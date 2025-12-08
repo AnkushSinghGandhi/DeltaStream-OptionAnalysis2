@@ -159,9 +159,11 @@ function App() {
     }
   }, [isConnected, selectedProduct, subscribe]);
 
-  // Update price history when new prices come in
+  // Update price history when new prices come in (WebSocket only)
   useEffect(() => {
-    const currentPrice = prices[selectedProduct];
+    if (!isConnected) return; // Skip if using REST (already handled above)
+    
+    const currentPrice = wsPrices[selectedProduct];
     if (currentPrice) {
       setPriceHistory(prev => {
         const newHistory = [...prev, {
@@ -172,11 +174,13 @@ function App() {
         return newHistory.slice(-100);
       });
     }
-  }, [prices, selectedProduct]);
+  }, [wsPrices, selectedProduct, isConnected]);
 
-  // Update PCR history when new chain summaries come in
+  // Update PCR history when new chain summaries come in (WebSocket only)
   useEffect(() => {
-    const currentSummary = chainSummaries[selectedProduct];
+    if (!isConnected) return; // Skip if using REST (already handled above)
+    
+    const currentSummary = wsChainSummaries[selectedProduct];
     if (currentSummary) {
       setPcrHistory(prev => {
         const newHistory = [...prev, {
@@ -188,7 +192,7 @@ function App() {
         return newHistory.slice(-50);
       });
     }
-  }, [chainSummaries, selectedProduct]);
+  }, [wsChainSummaries, selectedProduct, isConnected]);
 
   // Fetch volatility surface
   const fetchVolatilitySurface = useCallback(async () => {
