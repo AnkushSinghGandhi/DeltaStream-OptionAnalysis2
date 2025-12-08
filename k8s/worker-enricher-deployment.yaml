@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-enricher
+  namespace: option-aro
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: worker-enricher
+  template:
+    metadata:
+      labels:
+        app: worker-enricher
+    spec:
+      containers:
+      - name: worker-enricher
+        image: option-aro/worker-enricher:latest
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379/0"
+        - name: MONGO_URL
+          value: "mongodb://mongodb:27017/option_aro"
+        - name: CELERY_BROKER_URL
+          value: "redis://redis:6379/1"
+        - name: CELERY_RESULT_BACKEND
+          value: "redis://redis:6379/2"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker-enricher-hpa
+  namespace: option-aro
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: worker-enricher
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
