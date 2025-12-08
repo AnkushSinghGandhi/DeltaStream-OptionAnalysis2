@@ -1,0 +1,43 @@
+# Filebeat Configuration for Option ARO
+# Forwards logs to Elasticsearch
+
+filebeat.inputs:
+  # Docker container logs
+  - type: container
+    enabled: true
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+  # Application log files
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    fields:
+      project: option-aro
+
+# Elasticsearch output
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "option-aro-%{+yyyy.MM.dd}"
+
+# Kibana endpoint
+setup.kibana:
+  host: "kibana:5601"
+
+# Index template
+setup.template.name: "option-aro"
+setup.template.pattern: "option-aro-*"
+
+# Processors
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~

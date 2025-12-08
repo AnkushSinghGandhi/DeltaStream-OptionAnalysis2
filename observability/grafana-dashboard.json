@@ -1,0 +1,78 @@
+{
+  "dashboard": {
+    "title": "Option ARO Monitoring",
+    "description": "Real-time monitoring dashboard for Option ARO services",
+    "panels": [
+      {
+        "title": "Connected WebSocket Clients",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "socket_gateway_connected_clients"
+          }
+        ]
+      },
+      {
+        "title": "API Request Rate",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])"
+          }
+        ]
+      },
+      {
+        "title": "Celery Task Processing Rate",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(celery_tasks_total[5m])"
+          }
+        ]
+      },
+      {
+        "title": "Feed Generation Rate",
+        "type": "stat",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(feed_ticks_total[1m])"
+          }
+        ]
+      },
+      {
+        "title": "MongoDB Collection Sizes",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "mongodb_collection_size_bytes"
+          }
+        ]
+      },
+      {
+        "title": "Redis Memory Usage",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes"
+          }
+        ]
+      },
+      {
+        "title": "Recent Logs",
+        "type": "logs",
+        "datasource": "Loki",
+        "targets": [
+          {
+            "expr": "{job=\"option-aro\"}"
+          }
+        ]
+      }
+    ]
+  }
+}
