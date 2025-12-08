@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  # Infrastructure
+  redis:
+    image: redis:7-alpine
+    container_name: option-aro-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - option-aro-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mongodb:
+    image: mongo:6
+    container_name: option-aro-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: option_aro
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - option-aro-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/option_aro --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Microservices
+  auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: option-aro-auth
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - JWT_SECRET=your-secret-key-change-in-production
+      - SERVICE_NAME=auth
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: option-aro-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - AUTH_SERVICE_URL=http://auth:8001
+      - STORAGE_SERVICE_URL=http://storage:8003
+      - ANALYTICS_SERVICE_URL=http://analytics:8004
+      - SERVICE_NAME=api-gateway
+    depends_on:
+      - redis
+      - mongodb
+      - auth
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  socket-gateway:
+    build:
+      context: ./services/socket-gateway
+      dockerfile: Dockerfile
+    container_name: option-aro-socket-gateway
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - SERVICE_NAME=socket-gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  storage:
+    build:
+      context: ./services/storage
+      dockerfile: Dockerfile
+    container_name: option-aro-storage
+    ports:
+      - "8003:8003"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - SERVICE_NAME=storage
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  analytics:
+    build:
+      context: ./services/analytics
+      dockerfile: Dockerfile
+    container_name: option-aro-analytics
+    ports:
+      - "8004:8004"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - SERVICE_NAME=analytics
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  worker-enricher:
+    build:
+      context: ./services/worker-enricher
+      dockerfile: Dockerfile
+    container_name: option-aro-worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - SERVICE_NAME=worker-enricher
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  feed-generator:
+    build:
+      context: ./services/feed-generator
+      dockerfile: Dockerfile
+    container_name: option-aro-feed-generator
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - SERVICE_NAME=feed-generator
+      - FEED_INTERVAL=1
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+  logging-service:
+    build:
+      context: ./services/logging-service
+      dockerfile: Dockerfile
+    container_name: option-aro-logging
+    ports:
+      - "8005:8005"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - SERVICE_NAME=logging-service
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - option-aro-network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  mongo_data:
+
+networks:
+  option-aro-network:
+    driver: bridge
