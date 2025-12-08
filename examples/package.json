@@ -1,0 +1,16 @@
+{
+  "name": "option-aro-examples",
+  "version": "1.0.0",
+  "description": "Example WebSocket clients for Option ARO",
+  "main": "subscribe-example.js",
+  "scripts": {
+    "start": "node subscribe-example.js",
+    "nifty": "PRODUCT=NIFTY node subscribe-example.js",
+    "banknifty": "PRODUCT=BANKNIFTY node subscribe-example.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.5.4"
+  },
+  "author": "Option ARO Contributors",
+  "license": "MIT"
+}
