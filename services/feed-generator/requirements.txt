@@ -1,0 +1,2 @@
+redis==5.0.1
+structlog==24.1.0
