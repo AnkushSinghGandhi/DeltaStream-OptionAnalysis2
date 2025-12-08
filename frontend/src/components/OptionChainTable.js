@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 
 export function OptionChainTable({ chainData, spotPrice }) {
-  if (!chainData || !chainData.calls || !chainData.puts) {
-    return <div className="loading">No option chain data available</div>;
-  }
+  // Extract data with fallbacks
+  const calls = chainData?.calls || [];
+  const puts = chainData?.puts || [];
+  const strikes = chainData?.strikes || [];
 
-  const { calls, puts, strikes } = chainData;
-
-  // Find ATM strike
+  // Find ATM strike - hooks must be called unconditionally
   const atmStrike = useMemo(() => {
     if (!strikes || strikes.length === 0) return null;
     return strikes.reduce((prev, curr) =>
@@ -17,6 +16,8 @@ export function OptionChainTable({ chainData, spotPrice }) {
 
   // Create rows matching calls and puts by strike
   const rows = useMemo(() => {
+    if (!calls.length || !puts.length || !strikes.length) return [];
+    
     const callMap = new Map(calls.map(c => [c.strike, c]));
     const putMap = new Map(puts.map(p => [p.strike, p]));
     
@@ -27,6 +28,11 @@ export function OptionChainTable({ chainData, spotPrice }) {
       isATM: strike === atmStrike,
     }));
   }, [calls, puts, strikes, atmStrike]);
+
+  // Early return after hooks
+  if (!chainData || !chainData.calls || !chainData.puts) {
+    return <div className="loading">No option chain data available</div>;
+  }
 
   const formatNumber = (num, decimals = 2) => {
     if (num === undefined || num === null) return '-';
