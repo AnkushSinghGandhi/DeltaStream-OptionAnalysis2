@@ -1,0 +1,220 @@
+{
+  "info": {
+    "name": "Option ARO API",
+    "description": "Complete API collection for Option ARO clone",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"test123\",\n  \"name\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"test123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "verify"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Data",
+      "item": [
+        {
+          "name": "Get Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/data/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "data", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get Underlying Ticks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/data/underlying/NIFTY?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "data", "underlying", "NIFTY"],
+              "query": [{"key": "limit", "value": "10"}]
+            }
+          }
+        },
+        {
+          "name": "Get Option Chain",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/data/chain/NIFTY?limit=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "data", "chain", "NIFTY"],
+              "query": [{"key": "limit", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Get Expiries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/data/expiries/NIFTY",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "data", "expiries", "NIFTY"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get PCR Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/pcr/NIFTY",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "pcr", "NIFTY"]
+            }
+          }
+        },
+        {
+          "name": "Get PCR with History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/pcr/NIFTY?history=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "pcr", "NIFTY"],
+              "query": [{"key": "history", "value": "true"}]
+            }
+          }
+        },
+        {
+          "name": "Get Volatility Surface",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/volatility-surface/NIFTY",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "volatility-surface", "NIFTY"]
+            }
+          }
+        },
+        {
+          "name": "Get Max Pain",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/max-pain/NIFTY?expiry=2025-01-25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "max-pain", "NIFTY"],
+              "query": [{"key": "expiry", "value": "2025-01-25"}]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
