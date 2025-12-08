@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option ARO - WebSocket Client</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .price {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .metric:last-child { border-bottom: none; }
+        .label { font-weight: bold; }
+        .log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            padding: 2px 0;
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Option ARO - Real-Time Market Data</h1>
+    
+    <div id="status" class="status disconnected">
+        Status: Disconnected
+    </div>
+    
+    <div>
+        <button onclick="subscribeToProduct('NIFTY')">Subscribe to NIFTY</button>
+        <button onclick="subscribeToProduct('BANKNIFTY')">Subscribe to BANKNIFTY</button>
+        <button onclick="subscribeToProduct('AAPL')">Subscribe to AAPL</button>
+    </div>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Underlying Price</h2>
+            <div id="product">-</div>
+            <div class="price" id="price">-</div>
+            <div id="timestamp">-</div>
+        </div>
+        
+        <div class="panel">
+            <h2>Option Chain Summary</h2>
+            <div class="metric">
+                <span class="label">Expiry:</span>
+                <span id="expiry">-</span>
+            </div>
+            <div class="metric">
+                <span class="label">PCR (OI):</span>
+                <span id="pcr-oi">-</span>
+            </div>
+            <div class="metric">
+                <span class="label">PCR (Vol):</span>
+                <span id="pcr-vol">-</span>
+            </div>
+            <div class="metric">
+                <span class="label">ATM Straddle:</span>
+                <span id="straddle">-</span>
+            </div>
+            <div class="metric">
+                <span class="label">Max Pain:</span>
+                <span id="max-pain">-</span>
+            </div>
+        </div>
+        
+        <div class="panel" style="grid-column: span 2;">
+            <h2>Event Log</h2>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+    
+    <script>
+        const SOCKET_URL = 'http://localhost:8002';
+        const socket = io(SOCKET_URL);
+        
+        let currentProduct = null;
+        
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateStatus(connected) {
+            const statusEl = document.getElementById('status');
+            if (connected) {
+                statusEl.className = 'status connected';
+                statusEl.textContent = 'Status: Connected';
+            } else {
+                statusEl.className = 'status disconnected';
+                statusEl.textContent = 'Status: Disconnected';
+            }
+        }
+        
+        function subscribeToProduct(product) {
+            currentProduct = product;
+            socket.emit('subscribe', {type: 'product', symbol: product});
+            socket.emit('subscribe', {type: 'chain', symbol: product});
+            log(`Subscribed to ${product}`);
+        }
+        
+        socket.on('connect', () => {
+            log('Connected to Socket Gateway');
+            updateStatus(true);
+            socket.emit('get_products');
+        });
+        
+        socket.on('disconnect', () => {
+            log('Disconnected');
+            updateStatus(false);
+        });
+        
+        socket.on('connected', (data) => {
+            log(`Connection confirmed: ${data.client_id}`);
+        });
+        
+        socket.on('products', (data) => {
+            log(`Available products: ${data.products.join(', ')}`);
+        });
+        
+        socket.on('underlying_update', (data) => {
+            document.getElementById('product').textContent = data.product;
+            document.getElementById('price').textContent = data.price;
+            document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleTimeString();
+        });
+        
+        socket.on('chain_summary', (data) => {
+            if (data.product === currentProduct) {
+                document.getElementById('expiry').textContent = data.expiry;
+                document.getElementById('pcr-oi').textContent = data.pcr_oi.toFixed(4);
+                document.getElementById('pcr-vol').textContent = data.pcr_volume.toFixed(4);
+                document.getElementById('straddle').textContent = data.atm_straddle_price.toFixed(2);
+                log(`Chain update: ${data.product} PCR=${data.pcr_oi.toFixed(4)}`);
+            }
+        });
+        
+        socket.on('chain_update', (data) => {
+            if (data.product === currentProduct) {
+                document.getElementById('max-pain').textContent = data.max_pain_strike;
+                log(`Full chain: ${data.strikes.length} strikes, Max Pain=${data.max_pain_strike}`);
+            }
+        });
+    </script>
+</body>
+</html>
