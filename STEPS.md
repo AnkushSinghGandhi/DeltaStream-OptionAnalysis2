@@ -7,50 +7,50 @@
    - outputs: README.md, .gitignore, LICENSE, STEPS.md
    - commit: chore(repo): bootstrap repo scaffold
 
-2. [🔄] docker-compose: redis, mongo, feed-generator, worker, socket-gateway, api-gateway, auth, storage, analytics, logging
-   - outputs: docker-compose.yml
+2. [✅] docker-compose: redis, mongo, feed-generator, worker, socket-gateway, api-gateway, auth, storage, analytics, logging
+   - outputs: docker-compose.yml, Makefile
    - commit: feat(dev): docker-compose for local demo
 
-3. [❌] service: feed-generator (realistic dummy data with products, expiries, strikes, quotes, chains)
-   - outputs: services/feed-generator/
+3. [✅] service: feed-generator (realistic dummy data with products, expiries, strikes, quotes, chains)
+   - outputs: services/feed-generator/app.py, Dockerfile, requirements.txt, README.md
    - commit: feat(feed): add realistic feed generator
 
-4. [❌] service: worker-enricher (Celery) compute iv/straddle/pcr/store/publish
-   - outputs: services/worker-enricher/
+4. [✅] service: worker-enricher (Celery) compute iv/straddle/pcr/store/publish
+   - outputs: services/worker-enricher/app.py, Dockerfile, requirements.txt, supervisord.conf, README.md
    - commit: feat(worker): add enrichment worker and tasks
 
-5. [❌] service: socket-gateway (Flask-SocketIO) + redis pubsub listener
-   - outputs: services/socket-gateway/
+5. [✅] service: socket-gateway (Flask-SocketIO) + redis pubsub listener
+   - outputs: services/socket-gateway/app.py, Dockerfile, requirements.txt, README.md
    - commit: feat(socket): implement socket gateway and redis listener
 
-6. [❌] service: storage (MongoDB wrapper service)
-   - outputs: services/storage/
+6. [✅] service: storage (MongoDB wrapper service)
+   - outputs: services/storage/app.py, Dockerfile, requirements.txt, README.md
    - commit: feat(storage): add mongodb storage service
 
-7. [❌] basic end-to-end demo (ingest->worker->store->socket->client test)
-   - outputs: small demo working; instructions in README
+7. [🔄] basic end-to-end demo (ingest->worker->store->socket->client test)
+   - outputs: demo working; instructions in README
    - commit: feat(demo): add minimal e2e demo
 
 ## Phase 2: Complete Backend Microservices
 
-8. [❌] service: auth (JWT) with login/register + user store
-   - outputs: services/auth/
+8. [✅] service: auth (JWT) with login/register + user store
+   - outputs: services/auth/app.py, Dockerfile, requirements.txt, README.md
    - commit: feat(auth): add auth endpoints
 
-9. [❌] service: api-gateway (Flask) with REST endpoints + OpenAPI
-   - outputs: services/api-gateway/
+9. [✅] service: api-gateway (Flask) with REST endpoints + OpenAPI
+   - outputs: services/api-gateway/app.py, Dockerfile, requirements.txt, README.md
    - commit: feat(api): add api-gateway with openapi
 
-10. [❌] service: analytics (aggregation, PCR, IV surface, OHLC)
-    - outputs: services/analytics/
+10. [✅] service: analytics (aggregation, PCR, IV surface, OHLC)
+    - outputs: services/analytics/app.py, Dockerfile, requirements.txt, README.md
     - commit: feat(analytics): add analytics aggregation service
 
-11. [❌] service: logging-service (structured logs ingestion)
-    - outputs: services/logging-service/
+11. [✅] service: logging-service (structured logs ingestion)
+    - outputs: services/logging-service/app.py, Dockerfile, requirements.txt, README.md
     - commit: feat(logging): add logging consumer and doc
 
-12. [❌] scripts: start-local.sh, stop-local.sh, seed-data.sh, subscribe-example.js
-    - outputs: scripts/
+12. [✅] scripts: start-local.sh, stop-local.sh, seed-data.sh, subscribe-example.js
+    - outputs: scripts/, examples/
     - commit: chore(scripts): add utility scripts
 
 ## Phase 3: Production Readiness
