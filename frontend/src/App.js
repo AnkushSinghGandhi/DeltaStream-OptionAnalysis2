@@ -9,6 +9,7 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  Database,
 } from 'lucide-react';
 
 // Components
@@ -45,20 +46,116 @@ function App() {
   const [volatilitySurface, setVolatilitySurface] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // REST API data state (fallback when WebSocket not connected)
+  const [restPrices, setRestPrices] = useState({});
+  const [restChainData, setRestChainData] = useState({});
+  const [restChainSummaries, setRestChainSummaries] = useState({});
+  const [dataSource, setDataSource] = useState('rest'); // 'websocket' or 'rest'
 
   // WebSocket hook
   const {
     isConnected,
-    prices,
-    chainSummaries,
-    fullChains,
+    prices: wsPrices,
+    chainSummaries: wsChainSummaries,
+    fullChains: wsFullChains,
     subscribe,
   } = useSocket();
 
-  // Subscribe to products on mount and when selected product changes
+  // Use WebSocket data if connected, otherwise use REST data
+  const prices = isConnected ? wsPrices : restPrices;
+  const chainSummaries = isConnected ? wsChainSummaries : restChainSummaries;
+  const fullChains = isConnected ? wsFullChains : restChainData;
+
+  // Fetch data via REST API
+  const fetchRestData = useCallback(async (product) => {
+    try {
+      // Fetch underlying prices
+      const underlyingRes = await api.getUnderlying(product, 50);
+      if (underlyingRes.data && underlyingRes.data.ticks) {
+        const ticks = underlyingRes.data.ticks;
+        const latestTick = ticks[ticks.length - 1];
+        
+        setRestPrices(prev => ({
+          ...prev,
+          [product]: {
+            price: latestTick?.price,
+            timestamp: latestTick?.timestamp,
+            prevPrice: ticks.length > 1 ? ticks[ticks.length - 2]?.price : latestTick?.price,
+          }
+        }));
+
+        // Update price history
+        setPriceHistory(ticks.map(t => ({
+          time: t.timestamp,
+          price: t.price,
+        })));
+      }
+
+      // Fetch option chain
+      const chainRes = await api.getOptionChain(product);
+      if (chainRes.data && chainRes.data.chains && chainRes.data.chains[0]) {
+        const chain = chainRes.data.chains[0];
+        
+        setRestChainData(prev => ({
+          ...prev,
+          [product]: chain
+        }));
+
+        setRestChainSummaries(prev => ({
+          ...prev,
+          [product]: {
+            product: chain.product,
+            expiry: chain.expiry,
+            spot_price: chain.spot_price,
+            pcr_oi: chain.pcr_oi,
+            pcr_volume: chain.pcr_volume,
+            atm_straddle_price: chain.atm_straddle_price,
+            max_pain_strike: chain.max_pain_strike,
+            timestamp: chain.timestamp,
+          }
+        }));
+
+        // Update PCR history
+        setPcrHistory(prev => {
+          const newEntry = {
+            time: chain.timestamp,
+            pcr_oi: chain.pcr_oi,
+            pcr_volume: chain.pcr_volume,
+            spot_price: chain.spot_price,
+          };
+          // Keep last 50 entries and add new one
+          const updated = [...prev.slice(-49), newEntry];
+          return updated;
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch REST data:', err);
+    }
+  }, []);
+
+  // Initial data fetch and periodic refresh via REST
+  useEffect(() => {
+    // Fetch data immediately
+    fetchRestData(selectedProduct);
+    
+    // Set up periodic refresh every 3 seconds if not connected to WebSocket
+    const interval = setInterval(() => {
+      if (!isConnected) {
+        fetchRestData(selectedProduct);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [selectedProduct, isConnected, fetchRestData]);
+
+  // Subscribe to products on mount and when selected product changes (WebSocket)
   useEffect(() => {
     if (isConnected) {
       subscribe(selectedProduct);
+      setDataSource('websocket');
+    } else {
+      setDataSource('rest');
     }
   }, [isConnected, selectedProduct, subscribe]);
 
