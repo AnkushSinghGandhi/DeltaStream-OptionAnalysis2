@@ -1,4 +1,4 @@
-# Filebeat Configuration for Option ARO
+# Filebeat Configuration for DeltaStream
 # Forwards logs to Elasticsearch
 
 filebeat.inputs:
@@ -19,20 +19,20 @@ filebeat.inputs:
     json.keys_under_root: true
     json.add_error_key: true
     fields:
-      project: option-aro
+      project: deltastream
 
 # Elasticsearch output
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
-  index: "option-aro-%{+yyyy.MM.dd}"
+  index: "deltastream-%{+yyyy.MM.dd}"
 
 # Kibana endpoint
 setup.kibana:
   host: "kibana:5601"
 
 # Index template
-setup.template.name: "option-aro"
-setup.template.pattern: "option-aro-*"
+setup.template.name: "deltastream"
+setup.template.pattern: "deltastream-*"
 
 # Processors
 processors:

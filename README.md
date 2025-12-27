@@ -1,4 +1,4 @@
-# Option ARO Clone
+# deltastream - Option Analysis
 
 A production-grade, microservices-based option trading analytics platform with real-time data processing, WebSocket streaming, and comprehensive market analysis.
 
@@ -85,7 +85,7 @@ A production-grade, microservices-based option trading analytics platform with r
 ```bash
 # Clone repository
 git clone <repo-url>
-cd option-aro-clone
+cd deltastream-option-analysis
 
 # Start services
 ./scripts/start-local.sh
@@ -364,7 +364,7 @@ Create `.env` file or set environment variables:
 REDIS_URL=redis://redis:6379/0
 
 # MongoDB
-MONGO_URL=mongodb://mongodb:27017/option_aro
+MONGO_URL=mongodb://mongodb:27017/deltastream
 
 # JWT Secret (change in production!)
 JWT_SECRET=your-secret-key-change-in-production
@@ -417,7 +417,7 @@ curl http://localhost:8002/metrics
 ```bash
 # Add to prometheus.yml
 scrape_configs:
-  - job_name: 'option-aro'
+  - job_name: 'deltastream'
     static_configs:
       - targets:
         - 'api-gateway:8000'
@@ -430,7 +430,7 @@ scrape_configs:
 ### Project Structure
 
 ```
-option-aro-clone/
+deltastream-option-analysis/
 ├── services/           # Microservices
 │   ├── api-gateway/
 │   ├── auth/
@@ -537,7 +537,7 @@ docker-compose restart <service-name>
 redis-cli SUBSCRIBE market:underlying
 
 # Check MongoDB
-mongosh option_aro --eval "db.underlying_ticks.countDocuments()"
+mongosh deltastream --eval "db.underlying_ticks.countDocuments()"
 
 # Check worker status
 docker-compose logs worker-enricher

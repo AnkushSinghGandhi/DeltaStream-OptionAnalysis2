@@ -1,10 +1,10 @@
-# Prometheus Configuration for Option ARO
+# Prometheus Configuration for DeltaStream
 
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'option-aro'
+    cluster: 'deltastream'
     environment: 'production'
 
 scrape_configs:
@@ -52,7 +52,7 @@ scrape_configs:
       - role: pod
         namespaces:
           names:
-            - option-aro
+            - deltastream
     relabel_configs:
       - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
         action: keep

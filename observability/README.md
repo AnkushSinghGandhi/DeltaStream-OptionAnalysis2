@@ -1,6 +1,6 @@
 # Observability
 
-Monitoring and logging configurations for Option ARO.
+Monitoring and logging configurations for DeltaStream.
 
 ## Components
 

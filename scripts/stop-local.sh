@@ -3,7 +3,7 @@
 
 set -e
 
-echo "Stopping Option ARO services..."
+echo "Stopping DeltaStream services..."
 docker-compose down
 
 echo "Services stopped."

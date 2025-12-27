@@ -1,9 +1,9 @@
-# Makefile for Option ARO Clone
+# Makefile for DeltaStream - Option Analysis
 
 .PHONY: help build up down restart logs test lint clean
 
 help:
-	@echo "Option ARO Clone - Available Commands:"
+	@echo "DeltaStream - Option Analysis - Available Commands:"
 	@echo "  make build       - Build all Docker images"
 	@echo "  make up          - Start all services"
 	@echo "  make down        - Stop all services"
@@ -75,4 +75,4 @@ shell-redis:
 	docker-compose exec redis redis-cli
 
 shell-mongo:
-	docker-compose exec mongodb mongosh option_aro
+	docker-compose exec mongodb mongosh deltastream

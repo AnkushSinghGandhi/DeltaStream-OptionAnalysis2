@@ -104,7 +104,7 @@ def handle_connect():
     )
     
     emit('connected', {
-        'message': 'Connected to Option ARO socket gateway',
+        'message': 'Connected to DeltaStream socket gateway',
         'client_id': client_id,
         'rooms': ['general']
     })

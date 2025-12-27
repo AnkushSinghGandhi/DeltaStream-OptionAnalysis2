@@ -1,4 +1,4 @@
-# Logging Service
+# DeltaStream Logging Service
 
 ## Overview
 
@@ -50,12 +50,12 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: option-aro
+  - job_name: deltastream
     static_configs:
       - targets:
           - localhost
         labels:
-          job: option-aro
+          index: "deltastream-%{+yyyy.MM.dd}"
           __path__: /app/logs/*.log
 ```
 

@@ -3,7 +3,7 @@
 
 set -e
 
-echo "Starting Option ARO services..."
+echo "Starting DeltaStream services..."
 
 # Build images
 echo "Building Docker images..."

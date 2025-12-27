@@ -46,7 +46,7 @@ function App() {
   const [volatilitySurface, setVolatilitySurface] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // REST API data state (fallback when WebSocket not connected)
   const [restPrices, setRestPrices] = useState({});
   const [restChainData, setRestChainData] = useState({});
@@ -75,7 +75,7 @@ function App() {
       if (underlyingRes.data && underlyingRes.data.ticks) {
         const ticks = underlyingRes.data.ticks;
         const latestTick = ticks[ticks.length - 1];
-        
+
         setRestPrices(prev => ({
           ...prev,
           [product]: {
@@ -96,7 +96,7 @@ function App() {
       const chainRes = await api.getOptionChain(product);
       if (chainRes.data && chainRes.data.chains && chainRes.data.chains[0]) {
         const chain = chainRes.data.chains[0];
-        
+
         setRestChainData(prev => ({
           ...prev,
           [product]: chain
@@ -138,7 +138,7 @@ function App() {
   useEffect(() => {
     // Fetch data immediately
     fetchRestData(selectedProduct);
-    
+
     // Set up periodic refresh every 3 seconds if not connected to WebSocket
     const interval = setInterval(() => {
       if (!isConnected) {
@@ -162,7 +162,7 @@ function App() {
   // Update price history when new prices come in (WebSocket only)
   useEffect(() => {
     if (!isConnected) return; // Skip if using REST (already handled above)
-    
+
     const currentPrice = wsPrices[selectedProduct];
     if (currentPrice) {
       setPriceHistory(prev => {
@@ -179,7 +179,7 @@ function App() {
   // Update PCR history when new chain summaries come in (WebSocket only)
   useEffect(() => {
     if (!isConnected) return; // Skip if using REST (already handled above)
-    
+
     const currentSummary = wsChainSummaries[selectedProduct];
     if (currentSummary) {
       setPcrHistory(prev => {
@@ -515,7 +515,7 @@ function App() {
       <header className="header">
         <div className="header-logo">
           <Activity size={28} color="#4dabf7" />
-          <h1>Option ARO</h1>
+          <h1>DeltaStream</h1>
         </div>
         <div className="header-status">
           <div className="connection-status">
@@ -586,7 +586,7 @@ function App() {
         display: 'flex',
         justifyContent: 'space-between',
       }}>
-        <span>Option ARO Clone - Real-time Option Analytics Dashboard</span>
+        <span>DeltaStream - Option Analysis - Real-time Option Analytics Dashboard</span>
         <span>
           {currentChainSummary?.timestamp
             ? `Last Update: ${new Date(currentChainSummary.timestamp).toLocaleString()}`

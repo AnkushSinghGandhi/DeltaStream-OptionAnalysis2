@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: redis-config
-  namespace: option-aro
+  namespace: deltastream
 data:
   redis.conf: |
     appendonly yes
@@ -12,7 +12,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: option-aro
+  namespace: deltastream
 spec:
   replicas: 1
   selector:
@@ -53,7 +53,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: option-aro
+  namespace: deltastream
 spec:
   selector:
     app: redis
@@ -66,7 +66,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redis-pvc
-  namespace: option-aro
+  namespace: deltastream
 spec:
   accessModes:
   - ReadWriteOnce

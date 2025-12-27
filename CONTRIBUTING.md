@@ -1,4 +1,4 @@
-# Contributing to Option ARO Clone
+# Contributing to DeltaStream - Option Analysis
 
 Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
 
@@ -17,7 +17,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 ```bash
 # Clone repository
 git clone <repo-url>
-cd option-aro-clone
+cd deltastream-option-analysis
 
 # Start services
 docker-compose up -d

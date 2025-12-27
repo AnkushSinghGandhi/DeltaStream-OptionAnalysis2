@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Option ARO Dashboard Backend
+DeltaStream Dashboard Backend
 
 Provides:
 1. REST API endpoints for option chain data and analytics
@@ -24,7 +24,7 @@ from contextlib import asynccontextmanager
 import asyncio
 
 # Configuration
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/option_aro')
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/deltastream')
 
 # Mock data products
 PRODUCTS = ['NIFTY', 'BANKNIFTY', 'FINNIFTY', 'SENSEX', 'AAPL', 'TSLA', 'SPY', 'QQQ']
@@ -254,15 +254,15 @@ for product in PRODUCTS:
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     # Startup
-    print(f"Starting Option ARO Dashboard Backend")
+    print(f"Starting DeltaStream Dashboard Backend")
     print(f"MongoDB URL: {MONGO_URL}")
     yield
     # Shutdown
-    print("Shutting down Option ARO Dashboard Backend")
+    print("Shutting down DeltaStream Dashboard Backend")
 
 app = FastAPI(
-    title="Option ARO Dashboard API",
-    description="REST API for Option ARO Dashboard - Real-time Option Trading Analytics",
+    title="DeltaStream Dashboard API",
+    description="REST API for DeltaStream Dashboard - Real-time Option Trading Analytics",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -279,7 +279,7 @@ app.add_middleware(
 @app.get("/api/health")
 async def health():
     """Health check endpoint."""
-    return {"status": "healthy", "service": "option-aro-dashboard"}
+    return {"status": "healthy", "service": "deltastream-dashboard"}
 
 @app.get("/api/data/products")
 async def get_products():

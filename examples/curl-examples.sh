@@ -3,7 +3,7 @@
 
 BASE_URL="http://localhost:8000"
 
-echo "Option ARO API Examples"
+echo "DeltaStream API Examples"
 echo "======================"
 echo ""
 

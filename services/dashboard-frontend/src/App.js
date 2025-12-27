@@ -414,7 +414,7 @@ function App() {
       <header className="header">
         <div className="header-logo">
           <Activity size={28} color="#4dabf7" />
-          <h1>Option ARO</h1>
+          <h1>DeltaStream</h1>
         </div>
         <div className="header-status">
           <div className="connection-status">
@@ -485,7 +485,7 @@ function App() {
         display: 'flex',
         justifyContent: 'space-between',
       }}>
-        <span>Option ARO Clone - Real-time Option Analytics Dashboard</span>
+        <span>DeltaStream - Option Analysis - Real-time Option Analytics Dashboard</span>
         <span>
           {currentChainSummary?.timestamp
             ? `Last Update: ${new Date(currentChainSummary.timestamp).toLocaleString()}`

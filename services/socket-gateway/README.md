@@ -46,7 +46,7 @@ Clients (WebSocket)
 #### `connected`
 ```json
 {
-  "message": "Connected to Option ARO socket gateway",
+  "message": "Connected to DeltaStream socket gateway",
   "client_id": "abc123",
   "rooms": ["general"]
 }

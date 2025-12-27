@@ -1,6 +1,6 @@
-# Option ARO Clone - Complete Tutorial
+# DeltaStream - Option Analysis - Complete Tutorial
 
-A comprehensive guide to understanding microservices architecture, real-time data processing, and modern DevOps practices through the Option ARO trading analytics platform.
+A comprehensive guide to understanding microservices architecture, real-time data processing, and modern DevOps practices through the DeltaStream trading analytics platform.
 
 ---
 
@@ -42,9 +42,9 @@ A comprehensive guide to understanding microservices architecture, real-time dat
 
 ## 1. Introduction
 
-### What is Option ARO?
+### What is DeltaStream?
 
-Option ARO is a real-time option trading analytics platform that provides:
+DeltaStream is a real-time option trading analytics platform that provides:
 - Live market data streaming
 - Option chain analysis
 - Put-Call Ratio (PCR) calculations
@@ -78,7 +78,7 @@ This tutorial teaches you:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           OPTION ARO ARCHITECTURE                            │
+│                           DELTASTREAM ARCHITECTURE                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌─────────────────┐                      ┌─────────────────┐               │
@@ -349,14 +349,14 @@ services:
   
   redis:
     image: redis:7-alpine          # Official Redis image (Alpine = smaller)
-    container_name: option-aro-redis
+    container_name: deltastream-redis
     ports:
       - "6379:6379"                # Expose Redis port
     command: redis-server --appendonly yes  # Enable persistence
     volumes:
       - redis_data:/data           # Persist data to named volume
     networks:
-      - option-aro-network         # Connect to custom network
+      - deltastream-network         # Connect to custom network
     healthcheck:                   # Health check configuration
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s                 # Check every 5 seconds
@@ -365,17 +365,17 @@ services:
 
   mongodb:
     image: mongo:6
-    container_name: option-aro-mongodb
+    container_name: deltastream-mongodb
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: option_aro  # Create database on startup
+      MONGO_INITDB_DATABASE: deltastream  # Create database on startup
     volumes:
       - mongo_data:/data/db
     networks:
-      - option-aro-network
+      - deltastream-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/option_aro --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/deltastream --quiet
       interval: 10s
       timeout: 5s
       retries: 5
@@ -388,12 +388,12 @@ services:
     build:
       context: ./services/api-gateway  # Build from this directory
       dockerfile: Dockerfile           # Using this Dockerfile
-    container_name: option-aro-api-gateway
+    container_name: deltastream-api-gateway
     ports:
       - "8000:8000"
     environment:                       # Environment variables
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - AUTH_SERVICE_URL=http://auth:8001
       - STORAGE_SERVICE_URL=http://storage:8003
       - ANALYTICS_SERVICE_URL=http://analytics:8004
@@ -403,17 +403,17 @@ services:
       - mongodb
       - auth
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped            # Restart policy
 
   worker-enricher:
     build:
       context: ./services/worker-enricher
       dockerfile: Dockerfile
-    container_name: option-aro-worker
+    container_name: deltastream-worker
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - CELERY_BROKER_URL=redis://redis:6379/1   # Separate Redis DB for Celery
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - SERVICE_NAME=worker-enricher
@@ -423,7 +423,7 @@ services:
       mongodb:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
 # ============================================
@@ -437,7 +437,7 @@ volumes:
 # NETWORKS (Container Communication)
 # ============================================
 networks:
-  option-aro-network:
+  deltastream-network:
     driver: bridge  # Default network driver
 ```
 
@@ -474,7 +474,7 @@ docker-compose up -d --scale worker-enricher=3
 
 # Execute command in running service
 docker-compose exec redis redis-cli
-docker-compose exec mongodb mongosh option_aro
+docker-compose exec mongodb mongosh deltastream
 
 # View running services
 docker-compose ps
@@ -573,9 +573,9 @@ KEY CONCEPTS:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: option-aro           # All our resources will be in this namespace
+  name: deltastream           # All our resources will be in this namespace
   labels:
-    app: option-aro
+    app: deltastream
     environment: production
 ```
 
@@ -586,8 +586,8 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: option-aro-secrets
-  namespace: option-aro
+  name: deltastream-secrets
+  namespace: deltastream
 type: Opaque
 data:
   # Values are base64 encoded
@@ -598,7 +598,7 @@ data:
 # How to create secrets from command line:
 # kubectl create secret generic my-secret \
 #   --from-literal=password=mypassword \
-#   --namespace=option-aro
+#   --namespace=deltastream
 ```
 
 **3. ConfigMap (for non-sensitive config)**
@@ -607,11 +607,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: option-aro-config
-  namespace: option-aro
+  name: deltastream-config
+  namespace: deltastream
 data:
   REDIS_URL: "redis://redis-service:6379/0"
-  MONGO_URL: "mongodb://mongodb-service:27017/option_aro"
+  MONGO_URL: "mongodb://mongodb-service:27017/deltastream"
   LOG_LEVEL: "INFO"
   FEED_INTERVAL: "1"
 ```
@@ -624,7 +624,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway
-  namespace: option-aro
+  namespace: deltastream
   labels:
     app: api-gateway
 spec:
@@ -647,7 +647,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: option-aro/api-gateway:latest
+          image: deltastream/api-gateway:latest
           
           ports:
             - containerPort: 8000
@@ -659,12 +659,12 @@ spec:
             - name: REDIS_URL
               valueFrom:
                 configMapKeyRef:
-                  name: option-aro-config
+                  name: deltastream-config
                   key: REDIS_URL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: option-aro-secrets
+                  name: deltastream-secrets
                   key: jwt-secret
           
           # Resource limits
@@ -697,7 +697,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: api-gateway-service
-  namespace: option-aro
+  namespace: deltastream
 spec:
   selector:
     app: api-gateway             # Route traffic to pods with this label
@@ -715,7 +715,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: worker-enricher
-  namespace: option-aro
+  namespace: deltastream
 spec:
   replicas: 2
   selector:
@@ -728,7 +728,7 @@ spec:
     spec:
       containers:
         - name: worker
-          image: option-aro/worker-enricher:latest
+          image: deltastream/worker-enricher:latest
           env:
             - name: CELERY_BROKER_URL
               value: "redis://redis-service:6379/1"
@@ -746,7 +746,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: worker-enricher-hpa
-  namespace: option-aro
+  namespace: deltastream
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -775,18 +775,18 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: option-aro-ingress
-  namespace: option-aro
+  name: deltastream-ingress
+  namespace: deltastream
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: "letsencrypt-prod"  # For HTTPS
 spec:
   tls:
     - hosts:
-        - api.optionaro.com
-      secretName: option-aro-tls
+        - api.deltastream.com
+      secretName: deltastream-tls
   rules:
-    - host: api.optionaro.com
+    - host: api.deltastream.com
       http:
         paths:
           - path: /api
@@ -821,13 +821,13 @@ kubectl cluster-info
 # ============================================
 
 # Create namespace
-kubectl create namespace option-aro
+kubectl create namespace deltastream
 
 # List namespaces
 kubectl get namespaces
 
 # Set default namespace for context
-kubectl config set-context --current --namespace=option-aro
+kubectl config set-context --current --namespace=deltastream
 
 # ============================================
 # APPLYING MANIFESTS
@@ -2298,7 +2298,7 @@ def handle_connect():
     
     # Send confirmation to client
     emit('connected', {
-        'message': 'Connected to Option ARO',
+        'message': 'Connected to DeltaStream',
         'client_id': client_id,
         'rooms': ['general']
     })
@@ -2584,7 +2584,7 @@ def api_docs():
     return jsonify({
         "openapi": "3.0.0",
         "info": {
-            "title": "Option ARO API",
+            "title": "DeltaStream API",
             "version": "1.0.0"
         },
         "paths": {
@@ -3535,7 +3535,7 @@ docker stats
 
 ## Conclusion
 
-This tutorial covered the complete Option ARO architecture:
+This tutorial covered the complete DeltaStream architecture:
 
 1. **Infrastructure**: Docker, Kubernetes, Redis, MongoDB
 2. **Microservices**: Feed Generator, Worker, Socket Gateway, API Gateway, etc.

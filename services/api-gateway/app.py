@@ -48,9 +48,9 @@ def api_docs():
     openapi_spec = {
         "openapi": "3.0.0",
         "info": {
-            "title": "Option ARO API",
+            "title": "DeltaStream API",
             "version": "1.0.0",
-            "description": "REST API for Option ARO clone - real-time option market data and analytics"
+            "description": "REST API for DeltaStream - real-time option market data and analytics"
         },
         "servers": [
             {"url": "http://localhost:8000", "description": "Local development"}

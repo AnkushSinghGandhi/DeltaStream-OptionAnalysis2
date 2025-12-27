@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get Option ARO running in 5 minutes!
+Get DeltaStream running in 5 minutes!
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ Get Option ARO running in 5 minutes!
 ```bash
 # Clone repository
 git clone <repo-url>
-cd option-aro-clone
+cd deltastream-option-analysis
 
 # Start all services
 ./scripts/start-local.sh
@@ -94,7 +94,7 @@ docker-compose restart worker-enricher
 docker-compose up -d --scale worker-enricher=5
 
 # View MongoDB data
-docker-compose exec mongodb mongosh option_aro
+docker-compose exec mongodb mongosh deltastream
 ```
 
 ## Next Steps

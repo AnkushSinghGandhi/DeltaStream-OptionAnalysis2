@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: worker-enricher
-  namespace: option-aro
+  namespace: deltastream
 spec:
   replicas: 5
   selector:
@@ -15,12 +15,12 @@ spec:
     spec:
       containers:
       - name: worker-enricher
-        image: option-aro/worker-enricher:latest
+        image: deltastream/worker-enricher:latest
         env:
         - name: REDIS_URL
           value: "redis://redis:6379/0"
         - name: MONGO_URL
-          value: "mongodb://mongodb:27017/option_aro"
+          value: "mongodb://mongodb:27017/deltastream"
         - name: CELERY_BROKER_URL
           value: "redis://redis:6379/1"
         - name: CELERY_RESULT_BACKEND
@@ -37,7 +37,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: worker-enricher-hpa
-  namespace: option-aro
+  namespace: deltastream
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

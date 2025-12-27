@@ -1,7 +1,7 @@
 {
-  "name": "option-aro-examples",
-  "version": "1.0.0",
-  "description": "Example WebSocket clients for Option ARO",
+  "name": "deltastream-examples",
+  "version": "1.0.1",
+  "description": "Example WebSocket clients for DeltaStream",
   "main": "subscribe-example.js",
   "scripts": {
     "start": "node subscribe-example.js",
@@ -11,6 +11,6 @@
   "dependencies": {
     "socket.io-client": "^4.5.4"
   },
-  "author": "Option ARO Contributors",
+  "author": "DeltaStream Contributors",
   "license": "MIT"
 }

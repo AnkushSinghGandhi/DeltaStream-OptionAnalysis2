@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: socket-gateway
-  namespace: option-aro
+  namespace: deltastream
 spec:
   replicas: 3
   selector:
@@ -14,8 +14,8 @@ spec:
         app: socket-gateway
     spec:
       containers:
-      - name: socket-gateway
-        image: option-aro/socket-gateway:latest
+      - name: deltastream-secrets-gateway
+        image: deltastream/socket-gateway:latest
         ports:
         - containerPort: 8002
         env:
@@ -39,7 +39,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: socket-gateway
-  namespace: option-aro
+  namespace: deltastream
 spec:
   selector:
     app: socket-gateway

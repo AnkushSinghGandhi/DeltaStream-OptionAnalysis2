@@ -1,5 +1,5 @@
 # STEPS.md
-# Progress tracker for Option ARO clone. Each step is updated to ✅ when created.
+# Progress tracker for DeltaStream. Each step is updated to ✅ when created.
 
 ## Phase 1: Core Infrastructure & Minimal E2E Demo
 
@@ -91,7 +91,7 @@
 
 ✅ **All 20 steps completed!**
 
-The Option ARO clone is fully implemented with:
+The DeltaStream platform is fully implemented with:
 - 8 microservices (all backend, no frontend as requested)
 - Docker Compose for local development
 - Kubernetes manifests for production

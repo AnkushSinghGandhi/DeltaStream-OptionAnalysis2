@@ -2307,7 +2307,7 @@ spec:
     spec:
       containers:
       - name: worker-enricher
-        image: option-aro/worker-enricher:latest
+        image: deltastream/worker-enricher:latest
         resources:
           requests:
             memory: "256Mi"
@@ -2680,7 +2680,7 @@ Row 5: Infrastructure (CPU, Memory, Network)
 ```yaml
 # Prometheus alert rules
 groups:
-  - name: option-aro-alerts
+  - name: deltastream-alerts
     rules:
       - alert: HighErrorRate
         expr: rate(requests_total{status=~"5.."}[5m]) > 0.05
@@ -5014,7 +5014,7 @@ spec:
     spec:
       containers:
       - name: worker-enricher
-        image: option-aro/worker-enricher:latest
+        image: deltastream/worker-enricher:latest
         resources:
           requests:
             memory: "256Mi"
@@ -5387,7 +5387,7 @@ Row 5: Infrastructure (CPU, Memory, Network)
 ```yaml
 # Prometheus alert rules
 groups:
-  - name: option-aro-alerts
+  - name: deltastream-alerts
     rules:
       - alert: HighErrorRate
         expr: rate(requests_total{status=~"5.."}[5m]) > 0.05

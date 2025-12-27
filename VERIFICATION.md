@@ -1,6 +1,6 @@
 # Verification Guide
 
-This document provides step-by-step instructions to verify that the Option ARO system is working correctly.
+This document provides step-by-step instructions to verify that the DeltaStream system is working correctly.
 
 ## Prerequisites
 
@@ -80,7 +80,7 @@ docker-compose logs worker-enricher --tail=50 | grep "processed"
 
 ```bash
 # Check MongoDB collections
-docker-compose exec mongodb mongosh option_aro --eval "
+docker-compose exec mongodb mongosh deltastream --eval "
   db.underlying_ticks.countDocuments();
   db.option_quotes.countDocuments();
   db.option_chains.countDocuments();
@@ -317,7 +317,7 @@ docker-compose restart <service-name>
 docker-compose exec redis redis-cli ping
 
 # Check MongoDB connectivity
-docker-compose exec mongodb mongosh option_aro --eval "db.serverStatus()"
+docker-compose exec mongodb mongosh deltastream --eval "db.serverStatus()"
 
 # Restart worker
 docker-compose restart worker-enricher
@@ -380,4 +380,4 @@ If all steps pass, you have successfully verified:
 7. ✅ Authentication (Auth Service)
 8. ✅ Analytics (Analytics Service)
 
-**The Option ARO system is fully operational! 🎉**
+**The DeltaStream system is fully operational! 🎉**

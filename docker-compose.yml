@@ -4,14 +4,14 @@ services:
   # Infrastructure
   redis:
     image: redis:7-alpine
-    container_name: option-aro-redis
+    container_name: deltastream-redis
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     networks:
-      - option-aro-network
+      - deltastream-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -20,17 +20,17 @@ services:
 
   mongodb:
     image: mongo:6
-    container_name: option-aro-mongodb
+    container_name: deltastream-mongodb
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: option_aro
+      MONGO_INITDB_DATABASE: deltastream
     volumes:
       - mongo_data:/data/db
     networks:
-      - option-aro-network
+      - deltastream-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/option_aro --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/deltastream --quiet
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,12 +40,12 @@ services:
     build:
       context: ./services/auth
       dockerfile: Dockerfile
-    container_name: option-aro-auth
+    container_name: deltastream-auth
     ports:
       - "8001:8001"
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - JWT_SECRET=your-secret-key-change-in-production
       - SERVICE_NAME=auth
     depends_on:
@@ -54,19 +54,19 @@ services:
       mongodb:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   api-gateway:
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
-    container_name: option-aro-api-gateway
+    container_name: deltastream-api-gateway
     ports:
       - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - AUTH_SERVICE_URL=http://auth:8001
       - STORAGE_SERVICE_URL=http://storage:8003
       - ANALYTICS_SERVICE_URL=http://analytics:8004
@@ -76,71 +76,71 @@ services:
       - mongodb
       - auth
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   socket-gateway:
     build:
       context: ./services/socket-gateway
       dockerfile: Dockerfile
-    container_name: option-aro-socket-gateway
+    container_name: deltastream-socket-gateway
     ports:
       - "8002:8002"
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - SERVICE_NAME=socket-gateway
     depends_on:
       redis:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   storage:
     build:
       context: ./services/storage
       dockerfile: Dockerfile
-    container_name: option-aro-storage
+    container_name: deltastream-storage
     ports:
       - "8003:8003"
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - SERVICE_NAME=storage
     depends_on:
       mongodb:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   analytics:
     build:
       context: ./services/analytics
       dockerfile: Dockerfile
-    container_name: option-aro-analytics
+    container_name: deltastream-analytics
     ports:
       - "8004:8004"
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - SERVICE_NAME=analytics
     depends_on:
       - redis
       - mongodb
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   worker-enricher:
     build:
       context: ./services/worker-enricher
       dockerfile: Dockerfile
-    container_name: option-aro-worker
+    container_name: deltastream-worker
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - MONGO_URL=mongodb://mongodb:27017/option_aro
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - SERVICE_NAME=worker-enricher
@@ -150,14 +150,14 @@ services:
       mongodb:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   feed-generator:
     build:
       context: ./services/feed-generator
       dockerfile: Dockerfile
-    container_name: option-aro-feed-generator
+    container_name: deltastream-feed-generator
     environment:
       - REDIS_URL=redis://redis:6379/0
       - SERVICE_NAME=feed-generator
@@ -166,14 +166,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
   logging-service:
     build:
       context: ./services/logging-service
       dockerfile: Dockerfile
-    container_name: option-aro-logging
+    container_name: deltastream-logging
     ports:
       - "8005:8005"
     environment:
@@ -185,7 +185,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - option-aro-network
+      - deltastream-network
     restart: unless-stopped
 
 volumes:
@@ -193,5 +193,5 @@ volumes:
   mongo_data:
 
 networks:
-  option-aro-network:
+  deltastream-network:
     driver: bridge

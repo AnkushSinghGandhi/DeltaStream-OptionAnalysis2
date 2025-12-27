@@ -1,4 +1,4 @@
-# Promtail Configuration for Option ARO
+# Promtail Configuration for DeltaStream
 # Forwards logs to Loki
 
 server:
@@ -19,7 +19,7 @@ scrape_configs:
         refresh_interval: 5s
         filters:
           - name: label
-            values: ["com.docker.compose.project=option-aro"]
+            values: ["com.docker.compose.project=deltastream"]
     relabel_configs:
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*-)?(.*?)'
@@ -28,12 +28,12 @@ scrape_configs:
         target_label: 'stream'
 
   # File-based logs
-  - job_name: option-aro-logs
+  - job_name: deltastream-logs
     static_configs:
       - targets:
           - localhost
         labels:
-          job: option-aro
+          job: deltastream
           __path__: /app/logs/*.log
     pipeline_stages:
       - json:
@@ -55,7 +55,7 @@ scrape_configs:
       - role: pod
         namespaces:
           names:
-            - option-aro
+            - deltastream
     relabel_configs:
       - source_labels:
           - __meta_kubernetes_pod_node_name
