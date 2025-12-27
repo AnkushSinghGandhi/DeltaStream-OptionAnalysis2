@@ -850,102 +850,102 @@ kubectl delete -f k8s/api-gateway-deployment.yaml
 # ============================================
 
 # Get all resources in namespace
-kubectl get all -n option-aro
+kubectl get all -n deltastream
 
 # Get specific resource types
-kubectl get pods -n option-aro
-kubectl get deployments -n option-aro
-kubectl get services -n option-aro
-kubectl get configmaps -n option-aro
-kubectl get secrets -n option-aro
+kubectl get pods -n deltastream
+kubectl get deployments -n deltastream
+kubectl get services -n deltastream
+kubectl get configmaps -n deltastream
+kubectl get secrets -n deltastream
 
 # Detailed view
-kubectl get pods -o wide -n option-aro
+kubectl get pods -o wide -n deltastream
 
 # Watch for changes (live updates)
-kubectl get pods -w -n option-aro
+kubectl get pods -w -n deltastream
 
 # ============================================
 # DESCRIBING RESOURCES (Debugging)
 # ============================================
 
 # Describe a pod (shows events, status, etc.)
-kubectl describe pod api-gateway-abc123 -n option-aro
+kubectl describe pod api-gateway-abc123 -n deltastream
 
 # Describe a deployment
-kubectl describe deployment api-gateway -n option-aro
+kubectl describe deployment api-gateway -n deltastream
 
 # ============================================
 # LOGS
 # ============================================
 
 # View pod logs
-kubectl logs api-gateway-abc123 -n option-aro
+kubectl logs api-gateway-abc123 -n deltastream
 
 # Follow logs (real-time)
-kubectl logs -f api-gateway-abc123 -n option-aro
+kubectl logs -f api-gateway-abc123 -n deltastream
 
 # Logs from all pods with label
-kubectl logs -l app=api-gateway -n option-aro
+kubectl logs -l app=api-gateway -n deltastream
 
 # Previous container logs (if crashed)
-kubectl logs api-gateway-abc123 --previous -n option-aro
+kubectl logs api-gateway-abc123 --previous -n deltastream
 
 # ============================================
 # EXECUTING COMMANDS IN PODS
 # ============================================
 
 # Open shell in pod
-kubectl exec -it api-gateway-abc123 -n option-aro -- /bin/sh
+kubectl exec -it api-gateway-abc123 -n deltastream -- /bin/sh
 
 # Run single command
-kubectl exec api-gateway-abc123 -n option-aro -- ls -la
+kubectl exec api-gateway-abc123 -n deltastream -- ls -la
 
 # ============================================
 # SCALING
 # ============================================
 
 # Scale deployment manually
-kubectl scale deployment worker-enricher --replicas=5 -n option-aro
+kubectl scale deployment worker-enricher --replicas=5 -n deltastream
 
 # Check HPA status
-kubectl get hpa -n option-aro
+kubectl get hpa -n deltastream
 
 # ============================================
 # ROLLING UPDATES
 # ============================================
 
 # Update image
-kubectl set image deployment/api-gateway api-gateway=option-aro/api-gateway:v2 -n option-aro
+kubectl set image deployment/api-gateway api-gateway=deltastream/api-gateway:v2 -n deltastream
 
 # Check rollout status
-kubectl rollout status deployment/api-gateway -n option-aro
+kubectl rollout status deployment/api-gateway -n deltastream
 
 # View rollout history
-kubectl rollout history deployment/api-gateway -n option-aro
+kubectl rollout history deployment/api-gateway -n deltastream
 
 # Rollback to previous version
-kubectl rollout undo deployment/api-gateway -n option-aro
+kubectl rollout undo deployment/api-gateway -n deltastream
 
 # Rollback to specific revision
-kubectl rollout undo deployment/api-gateway --to-revision=2 -n option-aro
+kubectl rollout undo deployment/api-gateway --to-revision=2 -n deltastream
 
 # ============================================
 # PORT FORWARDING (Local Testing)
 # ============================================
 
 # Forward local port to pod
-kubectl port-forward pod/api-gateway-abc123 8000:8000 -n option-aro
+kubectl port-forward pod/api-gateway-abc123 8000:8000 -n deltastream
 
 # Forward to service
-kubectl port-forward svc/api-gateway-service 8000:8000 -n option-aro
+kubectl port-forward svc/api-gateway-service 8000:8000 -n deltastream
 
 # ============================================
 # RESOURCE MANAGEMENT
 # ============================================
 
 # Check resource usage
-kubectl top pods -n option-aro
+kubectl top pods -n deltastream
 kubectl top nodes
 
 # ============================================
@@ -953,13 +953,13 @@ kubectl top nodes
 # ============================================
 
 # Get events (useful for debugging)
-kubectl get events -n option-aro --sort-by='.lastTimestamp'
+kubectl get events -n deltastream --sort-by='.lastTimestamp'
 
 # Check pod status
-kubectl get pods -n option-aro -o jsonpath='{.items[*].status.phase}'
+kubectl get pods -n deltastream -o jsonpath='{.items[*].status.phase}'
 
 # Debug with temporary pod
-kubectl run debug --rm -it --image=busybox -n option-aro -- sh
+kubectl run debug --rm -it --image=busybox -n deltastream -- sh
 ```
 
 #### Kubernetes vs Docker Compose Comparison

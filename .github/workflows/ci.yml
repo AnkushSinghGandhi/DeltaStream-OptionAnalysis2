@@ -77,7 +77,7 @@ jobs:
           pytest tests/ -v --cov=services --cov-report=xml
         env:
           REDIS_URL: redis://localhost:6379/0
-          MONGO_URL: mongodb://localhost:27017/option_aro_test
+          MONGO_URL: mongodb://localhost:27017/deltastream_test
       
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -120,8 +120,8 @@ jobs:
           context: ./services/${{ matrix.service }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            option-aro/${{ matrix.service }}:latest
-            option-aro/${{ matrix.service }}:${{ github.sha }}
+            deltastream/${{ matrix.service }}:latest
+            deltastream/${{ matrix.service }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -175,10 +175,10 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/
-          kubectl rollout status deployment/api-gateway -n option-aro
-          kubectl rollout status deployment/worker-enricher -n option-aro
+          kubectl rollout status deployment/api-gateway -n deltastream
+          kubectl rollout status deployment/worker-enricher -n deltastream
       
       - name: Verify deployment
         run: |
-          kubectl get pods -n option-aro
-          kubectl get services -n option-aro
+          kubectl get pods -n deltastream
+          kubectl get services -n deltastream

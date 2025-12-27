@@ -97,7 +97,7 @@ Create alerts in Prometheus:
 
 ```yaml
 groups:
-  - name: option-aro
+  - name: deltastream
     rules:
       - alert: HighErrorRate
         expr: rate(errors_total[5m]) > 0.1
