@@ -24,7 +24,7 @@ structlog.configure(
 logger = structlog.get_logger()
 
 # Configuration
-MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/option_aro')
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/deltastream')
 SERVICE_NAME = os.getenv('SERVICE_NAME', 'storage')
 PORT = int(os.getenv('PORT', '8003'))
 
@@ -35,7 +35,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 # MongoDB client
 mongo_client = MongoClient(MONGO_URL)
-db = mongo_client['option_aro']
+db = mongo_client['deltastream']
 
 # Create indexes
 db.underlying_ticks.create_index([('product', ASCENDING), ('timestamp', DESCENDING)])

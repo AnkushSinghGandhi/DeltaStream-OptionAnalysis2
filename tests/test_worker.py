@@ -1,7 +1,8 @@
 """Tests for Worker Enricher service."""
 
 import sys
-sys.path.insert(0, '/app/services/worker-enricher')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../services/worker-enricher')))
 
 from datetime import datetime
 

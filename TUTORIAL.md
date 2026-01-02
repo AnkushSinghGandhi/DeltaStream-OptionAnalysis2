@@ -1326,8 +1326,8 @@ from pymongo import MongoClient, ASCENDING, DESCENDING
 from datetime import datetime, timedelta
 
 # Connect to MongoDB
-mongo_client = MongoClient('mongodb://localhost:27017/option_aro')
-db = mongo_client['option_aro']
+mongo_client = MongoClient('mongodb://localhost:27017/deltastream')
+db = mongo_client['deltastream']
 
 # ============================================
 # 1. CREATE INDEXES (Performance Critical!)
@@ -1553,7 +1553,7 @@ def upsert_latest_price(product: str, price: float):
 
 ```javascript
 // Connect to MongoDB shell
-// mongosh option_aro
+// mongosh deltastream
 
 // ============================================
 // DATABASE OPERATIONS
@@ -1563,7 +1563,7 @@ def upsert_latest_price(product: str, price: float):
 show dbs
 
 // Use database
-use option_aro
+use deltastream
 
 // Show collections
 show collections
@@ -1967,7 +1967,7 @@ def process_underlying_tick(self, tick_data: dict):
         return
     
     # Step 2: Store in MongoDB
-    db = get_mongo_client()['option_aro']
+    db = get_mongo_client()['deltastream']
     db.underlying_ticks.insert_one({
         'product': product,
         'price': tick_data['price'],
@@ -3502,7 +3502,7 @@ docker-compose exec redis redis-cli
 > SUBSCRIBE market:underlying
 
 # Check MongoDB
-docker-compose exec mongodb mongosh option_aro
+docker-compose exec mongodb mongosh deltastream
 > db.underlying_ticks.countDocuments()
 
 # Restart worker

@@ -38,7 +38,7 @@ logger = structlog.get_logger()
 
 # Configuration
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/option_aro')
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/deltastream')
 CELERY_BROKER = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 CELERY_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/2')
 SERVICE_NAME = os.getenv('SERVICE_NAME', 'worker-enricher')
@@ -138,7 +138,7 @@ def process_underlying_tick(self, tick_data: Dict[str, Any]):
             return
         
         # Store in MongoDB
-        db = get_mongo_client()['option_aro']
+        db = get_mongo_client()['deltastream']
         db.underlying_ticks.insert_one({
             'product': product,
             'price': price,
@@ -200,7 +200,7 @@ def process_option_quote(self, quote_data: Dict[str, Any]):
         product = quote_data['product']
         
         # Store in MongoDB
-        db = get_mongo_client()['option_aro']
+        db = get_mongo_client()['deltastream']
         db.option_quotes.insert_one({
             **quote_data,
             'timestamp': datetime.fromisoformat(quote_data['timestamp']),
@@ -305,7 +305,7 @@ def process_option_chain(self, chain_data: Dict[str, Any]):
         }
         
         # Store in MongoDB
-        db = get_mongo_client()['option_aro']
+        db = get_mongo_client()['deltastream']
         db.option_chains.insert_one({
             **enriched_chain,
             'timestamp': datetime.fromisoformat(chain_data['timestamp'])
@@ -394,7 +394,7 @@ def calculate_ohlc_window(self, product: str, window_minutes: int):
         window_minutes: Time window in minutes
     """
     try:
-        db = get_mongo_client()['option_aro']
+        db = get_mongo_client()['deltastream']
         redis_client = get_redis_client()
         
         # Get ticks from last N minutes
@@ -452,7 +452,7 @@ def calculate_volatility_surface(self, product: str):
     """
     try:
         redis_client = get_redis_client()
-        db = get_mongo_client()['option_aro']
+        db = get_mongo_client()['deltastream']
         
         # Get recent option quotes
         recent_time = datetime.now() - timedelta(minutes=5)

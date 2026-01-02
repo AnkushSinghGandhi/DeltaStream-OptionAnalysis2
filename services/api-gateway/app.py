@@ -28,6 +28,7 @@ logger = structlog.get_logger()
 AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://auth:8001')
 STORAGE_SERVICE_URL = os.getenv('STORAGE_SERVICE_URL', 'http://storage:8003')
 ANALYTICS_SERVICE_URL = os.getenv('ANALYTICS_SERVICE_URL', 'http://analytics:8004')
+AI_SERVICE_URL = os.getenv('AI_SERVICE_URL', 'http://ai-analyst:8006')
 SERVICE_NAME = os.getenv('SERVICE_NAME', 'api-gateway')
 PORT = int(os.getenv('PORT', '8000'))
 
@@ -260,6 +261,50 @@ def get_max_pain(product):
     except Exception as e:
         logger.error("get_max_pain_error", error=str(e))
         return jsonify({'error': 'Analytics service unavailable'}), 503
+
+
+# AI endpoints
+@app.route('/api/ai/pulse', methods=['GET'])
+def get_ai_pulse():
+    """Get market pulse from AI."""
+    try:
+        response = requests.get(
+            f"{AI_SERVICE_URL}/api/ai/pulse",
+            timeout=30  # AI might take longer
+        )
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        logger.error("get_ai_pulse_error", error=str(e))
+        return jsonify({'error': 'AI service unavailable'}), 503
+
+
+@app.route('/api/ai/sentiment', methods=['GET'])
+def get_ai_sentiment():
+    """Get sentiment analysis."""
+    try:
+        response = requests.get(
+            f"{AI_SERVICE_URL}/api/ai/sentiment",
+            timeout=30
+        )
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        logger.error("get_ai_sentiment_error", error=str(e))
+        return jsonify({'error': 'AI service unavailable'}), 503
+
+
+@app.route('/api/ai/chat', methods=['POST'])
+def ai_chat():
+    """Chat with AI Agent."""
+    try:
+        response = requests.post(
+            f"{AI_SERVICE_URL}/api/ai/chat",
+            json=request.get_json(),
+            timeout=60  # RAG taking longer
+        )
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        logger.error("ai_chat_error", error=str(e))
+        return jsonify({'error': 'AI service unavailable'}), 503
 
 
 if __name__ == '__main__':

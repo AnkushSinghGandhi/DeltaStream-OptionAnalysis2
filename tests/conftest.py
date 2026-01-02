@@ -17,17 +17,17 @@ def redis_client():
 @pytest.fixture(scope="session")
 def mongo_client():
     """Create MongoDB client for tests."""
-    client = MongoClient('mongodb://localhost:27017/option_aro_test')
+    client = MongoClient('mongodb://localhost:27017/deltastream_test')
     yield client
     # Cleanup
-    client.drop_database('option_aro_test')
+    client.drop_database('deltastream_test')
     client.close()
 
 
 @pytest.fixture(scope="session")
 def db(mongo_client):
     """Get test database."""
-    return mongo_client['option_aro_test']
+    return mongo_client['deltastream_test']
 
 
 @pytest.fixture(autouse=True)

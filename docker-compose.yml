@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Infrastructure
   redis:
-    image: redis:7-alpine
+    image: redis/redis-stack:latest
     container_name: deltastream-redis
     ports:
       - "6379:6379"
@@ -13,7 +13,7 @@ services:
     networks:
       - deltastream-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -70,6 +70,7 @@ services:
       - AUTH_SERVICE_URL=http://auth:8001
       - STORAGE_SERVICE_URL=http://storage:8003
       - ANALYTICS_SERVICE_URL=http://analytics:8004
+      - AI_SERVICE_URL=http://ai-analyst:8006
       - SERVICE_NAME=api-gateway
     depends_on:
       - redis
@@ -133,6 +134,29 @@ services:
       - deltastream-network
     restart: unless-stopped
 
+  ai-analyst:
+    build:
+      context: ./services/ai-analyst
+      dockerfile: Dockerfile
+    container_name: deltastream-ai-analyst
+    ports:
+      - "8006:8006"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MONGO_URL=mongodb://mongodb:27017/deltastream
+      - ANALYTICS_SERVICE_URL=http://analytics:8004
+      - SERVICE_NAME=ai-analyst
+      - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN}
+    volumes:
+      - ./:/app/project_docs
+    depends_on:
+      - redis
+      - mongodb
+      - analytics
+    networks:
+      - deltastream-network
+    restart: unless-stopped
+
   worker-enricher:
     build:
       context: ./services/worker-enricher
@@ -191,6 +215,7 @@ services:
 volumes:
   redis_data:
   mongo_data:
+
 
 networks:
   deltastream-network:

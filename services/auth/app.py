@@ -25,7 +25,7 @@ structlog.configure(
 logger = structlog.get_logger()
 
 # Configuration
-MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/option_aro')
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/deltastream')
 JWT_SECRET = os.getenv('JWT_SECRET', 'your-secret-key-change-in-production')
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
@@ -38,7 +38,7 @@ CORS(app)
 
 # MongoDB
 mongo_client = MongoClient(MONGO_URL)
-db = mongo_client['option_aro']
+db = mongo_client['deltastream']
 users_collection = db['users']
 
 # Create unique index on email

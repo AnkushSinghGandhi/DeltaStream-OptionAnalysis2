@@ -1,7 +1,8 @@
 """Tests for Feed Generator service."""
 
 import sys
-sys.path.insert(0, '/app/services/feed-generator')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../services/feed-generator')))
 
 from datetime import datetime
 

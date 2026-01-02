@@ -30,7 +30,7 @@ logger = structlog.get_logger()
 
 # Configuration
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/option_aro')
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017/deltastream')
 SERVICE_NAME = os.getenv('SERVICE_NAME', 'analytics')
 PORT = int(os.getenv('PORT', '8004'))
 
@@ -41,7 +41,7 @@ CORS(app)
 # Database clients
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 mongo_client = MongoClient(MONGO_URL)
-db = mongo_client['option_aro']
+db = mongo_client['deltastream']
 
 
 @app.route('/health', methods=['GET'])
