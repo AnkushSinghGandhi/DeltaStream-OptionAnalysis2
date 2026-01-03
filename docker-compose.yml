@@ -212,6 +212,28 @@ services:
       - deltastream-network
     restart: unless-stopped
 
+  trade-simulator:
+    build:
+      context: ./services/trade-simulator
+      dockerfile: Dockerfile
+    container_name: deltastream-trade-simulator
+    ports:
+      - "8007:8007"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/deltastream
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=your-secret-key-change-in-production
+      - SERVICE_NAME=trade-simulator
+      - PORT=8007
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - deltastream-network
+    restart: unless-stopped
+
 volumes:
   redis_data:
   mongo_data:
