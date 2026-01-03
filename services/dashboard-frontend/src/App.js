@@ -9,6 +9,8 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  Brain,
+  DollarSign,
 } from 'lucide-react';
 
 // Components
@@ -19,6 +21,8 @@ import { MetricsCards, DetailedMetrics } from './components/MetricsCards';
 import { LiveTicker } from './components/LiveTicker';
 import { IVSurface } from './components/IVSurface';
 import { OIHeatmap } from './components/OIHeatmap';
+import { AIInsights } from './components/AIInsights';
+import { Trading } from './components/Trading';
 
 // API
 import * as api from './services/api';
@@ -34,6 +38,8 @@ const TABS = [
   { id: 'oi-analysis', label: 'OI Analysis', icon: Layers },
   { id: 'iv-surface', label: 'IV Surface', icon: TrendingUp },
   { id: 'max-pain', label: 'Max Pain', icon: Target },
+  { id: 'ai-insights', label: 'AI Insights', icon: Brain },
+  { id: 'trading', label: 'Trading', icon: DollarSign },
 ];
 
 function App() {
@@ -402,6 +408,12 @@ function App() {
             )}
           </>
         );
+
+      case 'ai-insights':
+        return <AIInsights selectedProduct={selectedProduct} />;
+
+      case 'trading':
+        return <Trading />;
 
       default:
         return <div>Select a tab</div>;

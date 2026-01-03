@@ -31,29 +31,47 @@ api.interceptors.response.use(
 
 // Data endpoints
 export const getProducts = () => api.get('/api/data/products');
-export const getUnderlying = (product, limit = 100) => 
+export const getUnderlying = (product, limit = 100) =>
   api.get(`/api/data/underlying/${product}?limit=${limit}`);
-export const getOptionChain = (product, limit = 1) => 
+export const getOptionChain = (product, limit = 1) =>
   api.get(`/api/data/chain/${product}?limit=${limit}`);
 export const getExpiries = (product) => api.get(`/api/data/expiries/${product}`);
 
 // Analytics endpoints
-export const getPCR = (product, history = false) => 
+export const getPCR = (product, history = false) =>
   api.get(`/api/analytics/pcr/${product}?history=${history}`);
-export const getVolatilitySurface = (product) => 
+export const getVolatilitySurface = (product) =>
   api.get(`/api/analytics/volatility-surface/${product}`);
-export const getMaxPain = (product, expiry) => 
+export const getMaxPain = (product, expiry) =>
   api.get(`/api/analytics/max-pain/${product}?expiry=${expiry}`);
-export const getOIBuildup = (product, expiry) => 
+export const getOIBuildup = (product, expiry) =>
   api.get(`/api/analytics/oi-buildup/${product}?expiry=${expiry}`);
-export const getOHLC = (product, window = 5) => 
+export const getOHLC = (product, window = 5) =>
   api.get(`/api/analytics/ohlc/${product}?window=${window}`);
 
 // Auth endpoints
-export const login = (email, password) => 
+export const login = (email, password) =>
   api.post('/api/auth/login', { email, password });
-export const register = (email, password, name) => 
+export const register = (name, email, password) =>
   api.post('/api/auth/register', { email, password, name });
 export const verifyToken = () => api.post('/api/auth/verify');
+
+// Trading endpoints
+export const placeOrder = (orderData) =>
+  api.post('/api/trade/order', orderData);
+export const getOrders = (status, limit = 50) =>
+  api.get(`/api/trade/orders?${status ? `status=${status}&` : ''}limit=${limit}`);
+export const cancelOrder = (orderId) =>
+  api.delete(`/api/trade/order/${orderId}`);
+export const getPortfolio = () =>
+  api.get('/api/trade/portfolio');
+export const getPositions = () =>
+  api.get('/api/trade/positions');
+export const getPnL = (period = 'all') =>
+  api.get(`/api/trade/pnl?period=${period}`);
+export const getPerformance = () =>
+  api.get('/api/trade/performance');
+export const getRiskMetrics = () =>
+  api.get('/api/trade/risk');
 
 export default api;
