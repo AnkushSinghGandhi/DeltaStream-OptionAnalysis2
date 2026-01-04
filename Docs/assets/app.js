@@ -3,7 +3,7 @@
 
 // Configuration - automatically detects deployment environment
 const isGitHubPages = window.location.hostname.includes('github.io');
-const repoName = 'option-aro-clone'; // Change to your repo name
+const repoName = 'DeltaStream-OptionAnalysis2'; // Change to your repo name
 
 // Determine base path
 // Since index.html is now IN the docs folder, we use current directory
