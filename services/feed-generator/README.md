@@ -1,148 +1,120 @@
-# Feed Generator Service
+# Unified Feed Generator
 
-## Overview
+Single feed generator service with multiple data source providers.
 
-The Feed Generator service simulates a realistic market data feed for option trading. It generates synthetic but realistic market data including:
+## Configuration
 
-- **Products**: Multiple underlying symbols (NIFTY, BANKNIFTY, AAPL, TSLA, etc.)
-- **Expiry Dates**: Weekly and monthly option expiries
-- **Strike Prices**: Complete strike ladder around current spot price
-- **Option Quotes**: Bid/ask spreads, last price, volume, open interest
-- **Greeks**: Delta, Gamma, Vega, Theta
-- **Implied Volatility**: Realistic IV values (15-35%)
-- **Option Chains**: Complete call/put chains for each expiry
+Set `FEED_PROVIDER` environment variable to choose data source:
 
-## Data Flow
+### Synthetic Provider (Demo/Testing)
+```bash
+FEED_PROVIDER=synthetic
+```
+- Simulated market data
+- 24/7 availability
+- Free
+- Perfect for development
 
-The service publishes data to Redis pub/sub channels:
+### Global Datafeeds Provider (Production)
+```bash
+FEED_PROVIDER=globaldatafeeds
+GDF_API_KEY=your_api_key
+```
+- Real NSE/BSE market data
+- Market hours only
+- Requires API subscription
 
-1. `market:underlying` - Underlying price ticks (every tick)
-2. `market:option_chain` - Complete option chains (every 5 ticks)
-3. `market:option_quote` - Individual option quotes (random sampling)
+## Quick Start
+
+### Development (Synthetic)
+```bash
+docker-compose up feed-generator
+# Uses synthetic by default
+```
+
+### Production (Real Data)
+```bash
+# Set in .env or docker-compose.yml
+FEED_PROVIDER=globaldatafeeds
+GDF_API_KEY=your_key
+docker-compose up feed-generator
+```
 
 ## Environment Variables
 
-- `REDIS_URL`: Redis connection URL (default: `redis://localhost:6379/0`)
-- `FEED_INTERVAL`: Seconds between ticks (default: `1`)
-- `SERVICE_NAME`: Service identifier (default: `feed-generator`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `FEED_PROVIDER` | Data source: `synthetic` or `globaldatafeeds` | `synthetic` |
+| `REDIS_URL` | Redis connection string | `redis://redis:6379/0` |
 
-## Data Models
+### Synthetic Provider
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `FEED_INTERVAL` | Update interval (seconds) | `1` |
 
-### Underlying Tick
-```json
-{
-  "type": "UNDERLYING",
-  "product": "NIFTY",
-  "price": 21543.25,
-  "timestamp": "2025-01-15T10:30:45.123456",
-  "tick_id": 12345
-}
-```
+### Global Datafeeds Provider
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GDF_ENDPOINT` | WebSocket endpoint | `ws://nimblewebstream.lisuns.com:4575` |
+| `GDF_API_KEY` | API key | *Required* |
+| `SYMBOLS` | Comma-separated symbols | `NIFTY,BANKNIFTY` |
+| `POLL_INTERVAL` | Fetch interval (seconds) | `5` |
 
-### Option Quote
-```json
-{
-  "symbol": "NIFTY20250125C21500",
-  "product": "NIFTY",
-  "strike": 21500,
-  "expiry": "2025-01-25",
-  "option_type": "CALL",
-  "bid": 125.50,
-  "ask": 127.80,
-  "last": 126.50,
-  "volume": 5432,
-  "open_interest": 45678,
-  "delta": 0.5234,
-  "gamma": 0.0012,
-  "vega": 8.45,
-  "theta": -2.34,
-  "iv": 0.2145,
-  "timestamp": "2025-01-15T10:30:45.123456"
-}
-```
-
-### Option Chain
-```json
-{
-  "product": "NIFTY",
-  "expiry": "2025-01-25",
-  "spot_price": 21543.25,
-  "strikes": [21000, 21050, 21100, ...],
-  "calls": [...],
-  "puts": [...],
-  "timestamp": "2025-01-15T10:30:45.123456"
-}
-```
-
-## Price Generation Algorithm
-
-The service uses a simplified **Geometric Brownian Motion** model for underlying price updates:
+## Architecture
 
 ```
-S(t+1) = S(t) * (1 + N(0, σ))
+app.py (Entry Point)
+  ↓
+Provider Factory (based on FEED_PROVIDER)
+  ↓
+┌─────────────────┬──────────────────────┐
+│ Synthetic       │ Global Datafeeds     │
+│ Provider        │ Provider             │
+├─────────────────┼──────────────────────┤
+│ - Simulated     │ - Real market data   │
+│ - Always on     │ - Market hours only  │
+│ - Free          │ - API subscription   │
+└─────────────────┴──────────────────────┘
+  ↓
+Redis Pub/Sub (market:underlying, market:option_chain)
+  ↓
+Worker Enricher
 ```
 
-Where:
-- `S(t)` is the price at time t
-- `N(0, σ)` is a normal random variable with mean 0 and standard deviation σ
-- σ varies by product type (indices have lower volatility than stocks)
+## Adding New Providers
 
-## Option Pricing
+1. Create `providers/your_provider.py`
+2. Implement `BaseFeedProvider` interface
+3. Add to `app.py` provider mapping
 
-Options are priced using a simplified Black-Scholes approximation:
+Example:
+```python
+# providers/custom_provider.py
+from providers.base_provider import BaseFeedProvider
 
+class CustomProvider(BaseFeedProvider):
+    def connect(self):
+        # Your connection logic
+        pass
+    
+    def run(self):
+        # Your data fetching loop
+        pass
 ```
-Option Price = Intrinsic Value + Time Value
 
-Intrinsic Value (Call) = max(0, Spot - Strike)
-Intrinsic Value (Put) = max(0, Strike - Spot)
+## Switching Providers
 
-Time Value = Spot * IV * sqrt(TTE) * adjustment_factor
+No code changes needed - just update environment variable:
+
+```yaml
+# docker-compose.yml
+services:
+  feed-generator:
+    environment:
+      - FEED_PROVIDER=synthetic  # or globaldatafeeds
 ```
 
-This is intentionally simplified for demo purposes. Production systems should use proper options pricing libraries.
-
-## Greeks Calculation
-
-Greeks are approximated using simplified formulas:
-
-- **Delta**: ATM options ≈ 0.5, ITM ≈ 0.8, OTM ≈ 0.2
-- **Gamma**: Highest for ATM options
-- **Vega**: Proportional to `Spot * sqrt(TTE)`
-- **Theta**: `-OptionPrice / (TTE * 365)`
-
-## Running Locally
-
+Restart service:
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-export REDIS_URL=redis://localhost:6379/0
-export FEED_INTERVAL=1
-
-# Run the service
-python app.py
+docker-compose restart feed-generator
 ```
-
-## Monitoring
-
-The service emits structured JSON logs including:
-- Feed startup confirmation
-- Option chain publications
-- Status updates every 10 ticks
-- Current prices for all products
-
-## Performance Considerations
-
-- Generates ~100-200 messages per second (8 products, multiple quotes per product)
-- Redis pub/sub can handle this easily (tested up to 10k msg/sec)
-- To reduce load, adjust `FEED_INTERVAL` or reduce number of products
-
-## Future Enhancements
-
-- Add order book depth (bid/ask levels)
-- Implement corporate actions (dividends, splits)
-- Add futures data
-- Support for different market hours
-- Historical data replay mode
