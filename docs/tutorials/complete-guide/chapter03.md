@@ -243,10 +243,15 @@ We use **Redis approach** because:
 
 ---
 
-### 3.3 Building the Worker Enricher: Project Structure
+### 3.3 Building the Worker Enricher Service
+
+#### Step 3.1: Create the Service Directory Structure
+
+**Action:** Navigate to the worker enricher directory and create the necessary files:
 
 ```bash
 cd services/worker-enricher
+touch app.py requirements.txt Dockerfile supervisord.conf README.md
 ```
 
 **Files we'll create:**
@@ -262,13 +267,17 @@ services/worker-enricher/
 
 ---
 
-### 3.4 Dependencies: `requirements.txt`
+#### Step 3.2: Define Python Dependencies
 
-```txt
+**Action:** Create `requirements.txt` with the Celery and database dependencies:
+
+```bash
+cat <<EOF > requirements.txt
 celery==5.3.4
 redis==5.0.1
 pymongo==4.6.1
 structlog==23.2.0
+EOF
 ```
 
 **Why each?**
@@ -280,9 +289,11 @@ structlog==23.2.0
 
 ---
 
-### 3.5 Building `app.py`: Part 1 - Setup
+### 3.4 Building the Worker Application
 
-#### Part 3.5.1: Imports and Configuration
+#### Step 3.3: Add Imports and Configuration
+
+**Action:** Open `app.py` and add the imports and configuration at the top:
 
 ```python
 #!/usr/bin/env python3
@@ -350,7 +361,9 @@ SERVICE_NAME = os.getenv('SERVICE_NAME', 'worker-enricher')
 
 ---
 
-#### Part 3.5.2: Celery Initialization
+#### Step 3.4: Configure Celery Application
+
+**Action:** Add the Celery initialization code to `app.py`:
 
 ```python
 # Initialize Celery
@@ -461,7 +474,9 @@ task_retry_kwargs={'max_retries': 3, 'countdown': 5},
 
 ---
 
-#### Part 3.5.3: Lazy Client Initialization (Singleton Pattern)
+#### Step 3.5: Add Database Client Initialization
+
+**Action:** Add lazy initialization functions for MongoDB and Redis clients:
 
 ```python
 # Database clients (initialized lazily)
@@ -514,7 +529,9 @@ def get_mongo_client():
 
 ---
 
-#### Part 3.5.4: Custom Task Base Class (Dead-Letter Queue)
+#### Step 3.6: Create Custom Task Base Class
+
+**Action:** Add the custom task class for dead-letter queue handling:
 
 ```python
 class EnrichmentTask(Task):
@@ -584,9 +601,11 @@ while True:
 
 ---
 
-### 3.6 Building `app.py`: Part 2 - Task Functions
+### 3.5 Implementing Task Functions
 
-#### Part 3.6.1: Processing Underlying Ticks
+#### Step 3.7: Add Underlying Tick Processing Task
+
+**Action:** Add the Celery task for processing underlying price ticks:
 
 ```python
 @celery_app.task(base=EnrichmentTask, bind=True)
@@ -760,9 +779,11 @@ redis_client.publish('enriched:underlying', json.dumps(enriched))
 
 ---
 
-#### Part 3.6.2: Processing Option Chains (PCR & Max Pain)
+#### Step 3.8: Add Option Chain Processing Task
 
-This is the **core analytics logic**. We'll break it down step by step.
+**Action:** Add the core analytics task for processing option chains. This is the **most complex** task - it calculates PCR and max pain.
+
+Add to `app.py`:
 
 ```python
 @celery_app.task(base=EnrichmentTask, bind=True)
@@ -1069,8 +1090,8 @@ if previous_chain:
   "max_pain_strike": 21500,
   "total_call_oi": 1200000,
   "total_put_oi": 1228080,
-  "calls": [ { "strike": 21000, "last": 550, ...}, ... ],
-  "puts": [ { "strike": 21000, "last": 20, ...}, ... ],
+  "calls": [ { "strike": 21000, "last": 550, "delta": 0.55, "oi": 25000 }, /* ... more strikes ... */ ],
+  "puts": [ { "strike": 21000, "last": 20, "delta": -0.45, "oi": 30000 }, /* ... more strikes ... */ ],
   "timestamp": ISODate("2025-01-03T12:30:00Z"),
   "processed_at": "2025-01-03T12:30:00.250Z"
 }
@@ -1163,7 +1184,9 @@ The tutorial will continue with:
 
 **Ready to continue?** Let me know when you want the rest of Part 3!
 
-#### Part 3.6.3: OHLC Window Calculation
+#### Step 3.9: Add OHLC Window Calculation Task
+
+**Action:** Add the task for calculating OHLC (Open, High, Low, Close) windows:
 
 ```python
 @celery_app.task(base=EnrichmentTask, bind=True)
@@ -1310,7 +1333,9 @@ Example: 5-minute window
 
 ---
 
-#### Part 3.6.4: Volatility Surface Generation
+#### Step 3.10: Add Volatility Surface Generation Task
+
+**Action:** Add the task for generating implied volatility surfaces:
 
 ```python
 @celery_app.task(base=EnrichmentTask, bind=True)
@@ -1472,9 +1497,11 @@ avg_iv = (0.18 + 0.20 + 0.22) / 3 = 0.20 (20%)
 
 ---
 
-### 3.7 Pub/Sub Subscriber Implementation
+### 3.6 Setting Up the Subscriber
 
-Now we need the **subscriber** that listens to Redis channels and dispatches Celery tasks.
+#### Step 3.11: Implement Redis Pub/Sub Subscriber
+
+**Action:** Create the subscriber function that listens to Redis channels and dispatches tasks:
 
 ```python
 def subscribe_to_feeds():
@@ -1606,7 +1633,7 @@ if __name__ == '__main__':
 
 ---
 
-### 3.8 Supervisor Configuration
+#### Step 3.12: Configure Supervisor Process Manager
 
 We need both subscriber and worker running together. **Supervisor** manages multiple processes.
 
@@ -1699,11 +1726,12 @@ wait
 
 ---
 
-### 3.9 Docker Setup
+#### Step 3.13: Create Dockerfile
 
-Create `Dockerfile`:
+**Action:** Create the Dockerfile for the worker enricher service:
 
-```dockerfile
+```bash
+cat <<'EOF' > Dockerfile
 FROM python:3.9-slim
 
 # Install supervisor
@@ -1756,9 +1784,9 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 ---
 
-### 3.10 Docker Compose Integration
+#### Step 3.14: Add to Docker Compose
 
-Update `docker-compose.yml`:
+**Action:** Add the worker enricher service to the main `docker-compose.yml` in the project root:
 
 ```yaml
   worker-enricher:
@@ -1805,9 +1833,21 @@ docker exec deltastream-worker supervisorctl tail -f celery_worker
 
 ---
 
-### 3.11 Testing the Worker Enricher
+#### Step 3.15: Test the Worker Enricher
 
-#### Test 1: Manual MongoDB Inspection
+**Action:** Start the services and verify the worker is processing data correctly.
+
+**Test 1: Start Services**
+
+```bash
+# Build and start all services
+docker-compose up --build -d
+
+# Check logs
+docker-compose logs -f worker-enricher
+```
+
+**Test 2: Manual MongoDB Inspection**
 
 ```bash
 # Connect to MongoDB
@@ -1990,7 +2030,7 @@ tests/test_worker.py::test_atm_strike_selection PASSED
 
 ---
 
-### 3.12 Production Optimizations
+### 3.7 Production Optimizations
 
 #### 1. MongoDB Indexes (Critical for Performance)
 

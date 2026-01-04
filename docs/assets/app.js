@@ -34,11 +34,45 @@ const docsStructure = {
     'Tutorials': [
         {
             title: 'Complete Guide', path: 'tutorials/complete-guide/README.md', children: [
-                { title: 'Chapter 1: Architecture', path: 'tutorials/complete-guide/chapter01.md' },
-                { title: 'Chapter 2: Feed Generator', path: 'tutorials/complete-guide/chapter02.md' },
-                { title: 'Chapter 3: Worker Enricher', path: 'tutorials/complete-guide/chapter03.md' },
-                { title: 'Chapter 4: Storage & Auth', path: 'tutorials/complete-guide/chapter04.md' },
-                { title: 'Chapter 5: API Gateway', path: 'tutorials/complete-guide/chapter05.md' },
+                {
+                    title: 'Chapter 1: Architecture',
+                    children: [
+                        { title: '1-1: System Architecture', path: 'tutorials/complete-guide/chapter01-1.md' },
+                        { title: '1-2: Service Breakdown', path: 'tutorials/complete-guide/chapter01-2.md' },
+                        { title: '1-3: Project Setup', path: 'tutorials/complete-guide/chapter01-3.md' },
+                    ]
+                },
+                {
+                    title: 'Chapter 2: Feed Generator',
+                    children: [
+                        { title: '2-1: Fundamentals', path: 'tutorials/complete-guide/chapter02-1.md' },
+                        { title: '2-2: Synthetic Provider', path: 'tutorials/complete-guide/chapter02-2.md' },
+                        { title: '2-3: GDF Provider', path: 'tutorials/complete-guide/chapter02-3.md' },
+                        { title: '2-4: Summary', path: 'tutorials/complete-guide/chapter02-4.md' },
+                    ]
+                },
+                {
+                    title: 'Chapter 3: Worker Enricher',
+                    children: [
+                        { title: '3-1: Celery & Tasks', path: 'tutorials/complete-guide/chapter03-1.md' },
+                        { title: '3-2: Analytics', path: 'tutorials/complete-guide/chapter03-2.md' },
+                        { title: '3-3: MongoDB', path: 'tutorials/complete-guide/chapter03-3.md' },
+                    ]
+                },
+                {
+                    title: 'Chapter 4: Storage & Auth',
+                    children: [
+                        { title: '4-1: Storage Service', path: 'tutorials/complete-guide/chapter04-1.md' },
+                        { title: '4-2: Auth Service', path: 'tutorials/complete-guide/chapter04-2.md' },
+                    ]
+                },
+                {
+                    title: 'Chapter 5: API Gateway',
+                    children: [
+                        { title: '5-1: Gateway Basics', path: 'tutorials/complete-guide/chapter05-1.md' },
+                        { title: '5-2: OpenAPI', path: 'tutorials/complete-guide/chapter05-2.md' },
+                    ]
+                },
                 { title: 'Chapter 6: WebSocket Gateway', path: 'tutorials/complete-guide/chapter06.md' },
                 { title: 'Chapter 7: Analytics', path: 'tutorials/complete-guide/chapter07.md' },
                 { title: 'Chapter 8: Testing', path: 'tutorials/complete-guide/chapter08.md' },
@@ -181,9 +215,13 @@ function renderMarkdown(markdown, path) {
     marked.setOptions({
         highlight: function (code, lang) {
             if (lang && hljs.getLanguage(lang)) {
-                return hljs.highlight(code, { language: lang }).value;
+                try {
+                    return hljs.highlight(code, { language: lang }).value;
+                } catch (e) {
+                    console.error('Highlight error:', e);
+                }
             }
-            return hljs.highlightAuto(code).value;
+            return code; // Return plain code if no language specified
         },
         breaks: true,
         gfm: true,
@@ -192,6 +230,11 @@ function renderMarkdown(markdown, path) {
     const html = marked.parse(markdown);
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = html;
+
+    // Explicitly apply syntax highlighting to all code blocks
+    contentArea.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(block);
+    });
 
     // Generate TOC
     generateTOC(contentArea);
@@ -202,6 +245,7 @@ function renderMarkdown(markdown, path) {
     // Fix relative links
     fixRelativeLinks(path);
 }
+
 
 function generateTOC(contentArea) {
     const headings = contentArea.querySelectorAll('h2, h3, h4');
@@ -261,10 +305,25 @@ function fixRelativeLinks(currentPath) {
 
     document.querySelectorAll('#content-area a').forEach(link => {
         const href = link.getAttribute('href');
+
+        // Handle markdown file links
         if (href && href.endsWith('.md')) {
             link.onclick = (e) => {
                 e.preventDefault();
-                const fullPath = href.startsWith('/') ? href.slice(1) : `${basePath}/${href}`;
+
+                // If href starts with '/', it's absolute from docs root
+                // Otherwise, it's relative to current file
+                let fullPath;
+                if (href.startsWith('/')) {
+                    fullPath = href.slice(1);
+                } else if (href.startsWith('chapter')) {
+                    // Links like "chapter02-2.md" - same directory
+                    fullPath = `${basePath}/${href}`;
+                } else {
+                    // Relative link
+                    fullPath = `${basePath}/${href}`;
+                }
+
                 loadDoc(fullPath, e);
             };
         }

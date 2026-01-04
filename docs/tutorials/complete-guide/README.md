@@ -1,130 +1,137 @@
-# Complete Implementation Guide
+# DeltaStream Tutorial - Complete Guide
 
-> **Build the entire DeltaStream platform from scratch**
+## How to Use This Tutorial
 
-This comprehensive tutorial guides you step-by-step through creating a production-grade microservices-based options trading analytics platform.
-
-## 📚 Chapters (12 + Appendix)
-
-### Part 1-4: Foundation
-1. **[Architecture & Project Setup](chapter01.md)** - System design, tech stack, initial setup
-2. **[Feed Generator Service](chapter02.md)** - Market data simulation with Black-Scholes
-3. **[Worker Enricher Service](chapter03.md)** - Celery task processing, PCR, max pain
-4. **[Storage & Auth Services](chapter04.md)** - MongoDB wrapper, JWT authentication
-
-### Part 5-8: API & Real-time
-5. **[API Gateway](chapter05.md)** - Request routing, authentication, CORS
-6. **[WebSocket Gateway](chapter06.md)** - Real-time streaming, room subscriptions
-7. **[Analytics Service](chapter07.md)** - Advanced calculations, trend analysis
-8. **[Testing & Deployment](chapter08.md)** - pytest, Docker Compose basics
-
-### Part 9-12: Advanced Features
-9. **[AI Analyst Service](chapter09.md)** - LangChain, RAG, sentiment analysis
-10. **[Logging Service](chapter10.md)** - Centralized logging, structlog
-11. **[Kubernetes Deployment](chapter11.md)** - Production orchestration, HPA
-12. **[Observability & Monitoring](chapter12.md)** - Prometheus, Grafana, Loki
-13. **[Trade Simulator (OMS + RMS)](chapter13.md)** - Paper trading, order matching, risk management
-
-### Appendix
-- **[Appendix A: Makefile](appendix-a.md)** - Development automation commands
+The tutorial is split into focused sub-chapters for easier learning. Each sub-chapter ends with navigation links to move between sections.
 
 ---
 
-## 🎯 Learning Paths
+## Table of Contents
 
-### Path 1: Complete Beginner (30 hours)
-Follow chapters sequentially from 1-12. Each chapter builds on previous ones.
+### Chapter 1: Architecture & Project Setup
 
-### Path 2: Experienced Developer (15 hours)
-- Skim chapters 1-4 (familiar concepts)
-- Focus on chapters 5-12 (microservices patterns)
-- Deep dive into chapters 9, 11, 12 (advanced topics)
+- **[Chapter 1-1: System Architecture](chapter01-1.md)** (8.3K)
+  - Understanding the problem domain
+  - Microservices overview
+  - Why microservices for this project
 
-### Path 3: Specific Topics
-- **Real-time systems**: Chapters 6, 11
-- **AI/ML integration**: Chapter 9
-- **DevOps**: Chapters 8, 11, 12
-- **Data processing**: Chapters 2, 3
+- **[Chapter 1-2: Service Breakdown](chapter01-2.md)** (23K)
+  - Feed Generator details
+  - Worker Enricher details
+  - Storage, Auth, API Gateway
+  - Socket Gateway, Analytics
+  - Data flow walkthrough
 
----
-
-## 📖 How to Follow This Tutorial
-
-### Prerequisites
-- Python 3.10+ knowledge
-- Basic Docker understanding
-- Familiarity with REST APIs
-- Command line proficiency
-
-### Recommended Approach
-1. **Read the chapter**: Understand concepts before coding
-2. **Type the code**: Don't copy-paste (muscle memory helps)
-3. **Test immediately**: Verify each component works
-4. **Understand why**: Focus on patterns, not just syntax
-
-### Each Chapter Includes
-- ✅ Learning objectives
-- ✅ Complete, runnable code
-- ✅ Line-by-line explanations
-- ✅ Production tips
-- ✅ Testing instructions
-- ✅ Key takeaways
+- **[Chapter 1-3: Project Setup](chapter01-3.md)** (15K)
+  - Directory structure
+  - Development environment setup
+  - Git initialization
 
 ---
 
-## 💻 What You'll Build
+### Chapter 2: Feed Generator Service
 
-By the end of this tutorial, you'll have:
+- **[Chapter 2-1: Fundamentals & Architecture](chapter02-1.md)** (5.8K)
+  - Option pricing concepts
+  - Greeks explained
+  - Provider pattern introduction
 
-**9 Microservices:**
-- Feed Generator (data simulation)
-- Worker Enricher (Celery processing)
-- Storage (MongoDB wrapper)
-- Auth (JWT authentication)
-- API Gateway (routing)
-- Socket Gateway (WebSocket)
-- Analytics (advanced calculations)
-- AI Analyst (LLM integration)
-- Logging (centralized logs)
+- **[Chapter 2-2: Building Synthetic Provider](chapter02-2.md)** (38K)
+  - Expiry generation (weekly + monthly)
+  - Strike generation
+  - Option pricing algorithm
+  - Price movements (Brownian motion)
+  - Publishing to Redis
 
-**Infrastructure:**
-- Docker containerization
-- Docker Compose orchestration
-- Kubernetes deployment
-- Prometheus + Grafana monitoring
+- **[Chapter 2-3: Building Global Datafeeds Provider](chapter02-3.md)** (14K)
+  - Connection setup
+  - Data fetching APIs
+  - Data transformation
+  - Publishing logic
+  - Error handling
 
-**Real-world Patterns:**
-- Event-driven architecture
-- Pub/Sub messaging
-- Task queues
-- Caching strategies
-- API Gateway pattern
-- RAG (Retrieval-Augmented Generation)
+- **[Chapter 2-4: Summary & Testing](chapter02-4.md)** (2.0K)
+  - What you've built
+  - Docker configuration
+  - Testing workflows
 
 ---
 
-## 📊 Tutorial Statistics
+### Chapter 3: Worker Enricher Service
 
-- **Total Lines**: 10,023
-- **Code Examples**: 200+
-- **Production Patterns**: 15+
-- **Estimated Time**: 25-30 hours
-- **Difficulty**: Intermediate to Advanced
+- **[Chapter 3-1: Celery & Task Queues](chapter03-1.md)** (20K)
+  - Celery architecture
+  - Broker setup
+  - Task definitions
+
+- **[Chapter 3-2: Analytics Implementation](chapter03-2.md)** (20K)
+  - PCR calculation
+  - Max Pain algorithm
+  - IV Rank
+  - OHLC generation
+
+- **[Chapter 3-3: MongoDB & Caching](chapter03-3.md)** (20K)
+  - Document models
+  - Indexes
+  - Cache patterns
+  - Repository pattern
 
 ---
 
-## 🎓 What Makes This Tutorial Special
+### Chapter 4: Storage & Auth Services
 
-1. **Production-Ready Code**: Not just POCs, but patterns used in real systems
-2. **Deep Explanations**: Why, not just how
-3. **Complete System**: Every component, fully integrated
-4. **Modern Stack**: Latest Python, Docker, Kubernetes, AI/ML
-5. **Interview Prep**: Concepts explained at depth for technical interviews
+- **[Chapter 4-1: Storage Service](chapter04-1.md)** (3K)
+  - Repository pattern
+  - MongoDB integration
+  - REST API design
+
+- **[Chapter 4-2: Auth Service](chapter04-2.md)** (29K)
+  - JWT implementation
+  - Password hashing
+  - User management
+  - Token refresh
 
 ---
 
-## 🚀 Getting Started
+### Chapter 5: API Gateway
 
-**Start here**: [Chapter 1: Architecture & Project Setup](chapter01.md)
+- **[Chapter 5-1: Gateway Basics](chapter05-1.md)** (28K)
+  - Routing
+  - Middleware
+  - CORS configuration
+  - Request forwarding
 
-Each chapter is self-contained but builds on previous ones. Have fun building! 🎉
+- **[Chapter 5-2: OpenAPI & Testing](chapter05-2.md)** (4K)
+  - OpenAPI specification
+  - API documentation
+  - Integration testing
+
+---
+
+### Remaining Chapters (Not Split - Under 1000 Lines)
+
+- **[Chapter 6: WebSocket Service](chapter06.md)** (16K)
+- **[Chapter 7: Analytics Service](chapter07.md)** (4K)
+- **[Chapter 8: Testing & Deployment](chapter08.md)** (12K)
+- **[Chapter 9: AI Integration](chapter09.md)** (24K)
+- **[Chapter 10: Monitoring](chapter10.md)** (4K)
+- **[Chapter 11: Security](chapter11.md)** (8K)
+- **[Chapter 12: Performance](chapter12.md)** (8K)
+- **[Chapter 13: Advanced Topics](chapter13.md)** (28K)
+
+---
+
+## Navigation Tips
+
+- Each sub-chapter has **Previous/Next** links at the bottom
+- You can jump to any chapter using this index
+- Larger chapters (2,000+ lines) have been split for easier learning
+- Code is built incrementally across sub-chapters
+
+## Getting Started
+
+👉 **Start here:** [Chapter 1-1: System Architecture](chapter01-1.md)
+
+---
+
+**Happy Learning! 🚀**

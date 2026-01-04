@@ -934,29 +934,42 @@ For DeltaStream, **monorepo** is the right choice (single team, coordinated rele
 
 ### 1.7 Setting Up the Development Environment
 
-#### Prerequisites
-
-Install the following:
-
-1. **Docker Desktop** (includes Docker + Docker Compose)
-   - Mac: `brew install --cask docker`
-   - Windows: Download from docker.com
-   - Linux: `sudo apt-get install docker.io docker-compose`
-
-2. **Python 3.9+** (for local development)
-   - Mac: `brew install python@3.9`
-   - Windows: Download from python.org
-   - Linux: `sudo apt-get install python3.9`
-
-3. **Git**
-   - Mac: `brew install git`
-   - Linux: `sudo apt-get install git`
-
-4. **Code editor** (VS Code recommended)
+Now let's set up your development environment step by step.
 
 ---
 
-#### Initialize Project
+#### Step 1.1: Install Prerequisites
+
+Before starting, ensure you have these tools installed:
+
+**Install Docker Desktop** (includes Docker + Docker Compose):
+- Mac: `brew install --cask docker`
+- Windows: Download from docker.com
+- Linux: `sudo apt-get install docker.io docker-compose`
+
+**Install Python 3.9+** (for local development):
+- Mac: `brew install python@3.9`
+- Windows: Download from python.org
+- Linux: `sudo apt-get install python3.9`
+
+**Install Git**:
+- Mac: `brew install git`
+- Linux: `sudo apt-get install git`
+
+**Install a code editor** (VS Code recommended)
+
+**Verify installations:**
+```bash
+docker --version          # Should show Docker version 20+
+python3 --version         # Should show Python 3.9+
+git --version            # Should show Git version 2+
+```
+
+---
+
+#### Step 1.2: Create the Project Directory
+
+**Action:** Create and initialize your project directory:
 
 ```bash
 # Create project directory
@@ -965,8 +978,17 @@ cd deltastream-option-analysis
 
 # Initialize git
 git init
+```
 
-# Create .gitignore
+**Verify:** You should now be in the `deltastream-option-analysis` directory and see the message "Initialized empty Git repository".
+
+---
+
+#### Step 1.3: Create .gitignore File
+
+**Action:** Create a `.gitignore` file to exclude generated files from version control:
+
+```bash
 cat <<EOF > .gitignore
 __pycache__/
 *.pyc
@@ -979,9 +1001,19 @@ logs/
 EOF
 ```
 
+**What's happening:**
+- `__pycache__/`, `*.pyc`, `*.pyo`: Python bytecode (auto-generated, shouldn't be versioned)
+- `.env`: Environment variables with secrets (NEVER commit to git)
+- `*.log`: Log files (generated at runtime)
+- `.pytest_cache/`: Test cache (auto-generated)
+
+**Verify:** Run `ls -a` and you should see `.gitignore` in the directory.
+
 ---
 
-#### Create `.env.example`
+#### Step 1.4: Create Environment Variables Template
+
+**Action:** Create `.env.example` as a template for required environment variables:
 
 ```bash
 cat <<EOF > .env.example
@@ -1000,14 +1032,22 @@ CELERY_RESULT_BACKEND=redis://redis:6379/2
 EOF
 ```
 
-**Why `.env.example` instead of `.env`?**
-- `.env` contains secrets (not committed to git)
-- `.env.example` shows required variables (committed to git)
-- Developers copy: `cp .env.example .env` and fill in their secrets
+**Non-trivial concept - Why `.env.example` instead of `.env`?**
+- `.env` contains actual secrets (API keys, passwords) → NEVER commit to git
+- `.env.example` shows what variables are needed → ALWAYS commit to git
+- Team workflow:
+  1. New developer clones repository
+  2. Runs: `cp .env.example .env`
+  3. Fills in their own secret values
+  4. Their `.env` stays local (protected by `.gitignore`)
+
+**Verify:** The file `.env.example` should exist. Later you'll copy it to create your actual `.env`.
 
 ---
 
-#### Create Directory Structure
+#### Step 1.5: Create the Directory Structure
+
+**Action:** Create all service directories:
 
 ```bash
 # Create service directories
@@ -1020,11 +1060,37 @@ mkdir -p tests
 mkdir -p examples scripts k8s observability
 ```
 
+**Non-trivial concept - Brace expansion:**
+The syntax `{a,b,c}` creates multiple directories:
+- `mkdir -p services/{feed-generator,worker-enricher}` 
+- Expands to: `mkdir -p services/feed-generator services/worker-enricher`
+
+**Verify:** Run `tree -L 2` (or `find . -type d`) to see the directory structure:
+```
+.
+├── services/
+│   ├── feed-generator/
+│   ├── worker-enricher/
+│   ├── auth/
+│   ├── api-gateway/
+│   ├── storage/
+│   ├── analytics/
+│   ├── socket-gateway/
+│   └── logging-service/
+├── tests/
+├── examples/
+├── scripts/
+├── k8s/
+└── observability/
+```
+
 ---
 
-#### Create `docker-compose.yml`
+#### Step 1.6: Create the Docker Compose Foundation
 
-This file orchestrates all services. We'll build it incrementally in later parts, but here's the foundation:
+**Action:** Create `docker-compose.yml` to orchestrate infrastructure services. We'll add application services in later chapters.
+
+Create the file with this content:
 
 ```yaml
 version: '3.8'
@@ -1182,9 +1248,11 @@ networks:
 
 ---
 
-### 1.8 Verifying the Setup
+#### Step 1.7: Verify the Docker Compose Setup
 
-Start just the infrastructure:
+Now let's verify that your Docker Compose infrastructure is working correctly.
+
+**Action:** Start just the infrastructure services (Redis and MongoDB):
 
 ```bash
 # Start Redis and MongoDB
@@ -1192,20 +1260,35 @@ docker-compose up -d redis mongodb
 
 # Check status
 docker-compose ps
-
-# Should show:
-# NAME                    STATUS              PORTS
-# deltastream-redis       Up (healthy)        0.0.0.0:6379->6379/tcp
-# deltastream-mongodb     Up (healthy)        0.0.0.0:27017->27017/tcp
 ```
 
-**Test Redis:**
+**Expected output:**
+```
+NAME                    STATUS              PORTS
+deltastream-redis       Up (healthy)        0.0.0.0:6379->6379/tcp
+deltastream-mongodb     Up (healthy)        0.0.0.0:27017->27017/tcp
+```
+
+**What's happening:**
+- `up -d`: Start services in detached mode (background)
+- `-d redis mongodb`: Only start these two services (not the whole stack yet)
+
+**Non-trivial concept - Health checks:**
+Notice the `(healthy)` status. Docker waited for the health check to pass before marking the service as ready. Without health checks, services might show "Up" but not actually be ready to accept connections.
+
+---
+
+#### Step 1.8: Test Redis Connection
+
+**Action:** Test that Redis is working correctly:
 
 ```bash
 # Connect to Redis CLI
 docker exec -it deltastream-redis redis-cli
+```
 
-# Inside Redis CLI:
+**Inside the Redis CLI, run these commands:**
+```bash
 127.0.0.1:6379> PING
 PONG
 
@@ -1218,13 +1301,27 @@ OK
 127.0.0.1:6379> exit
 ```
 
-**Test MongoDB:**
+**What's happening:**
+- `docker exec -it`: Execute interactive terminal command in running container
+- `redis-cli`: Connect to Redis command-line interface
+- `PING/PONG`: Health check command
+- `SET/GET`: Test write and read operations
+
+**Verify:** You should see exactly the responses shown above. If `PING` returns `PONG`, Redis is working!
+
+---
+
+#### Step 1.9: Test MongoDB Connection
+
+**Action:** Test that MongoDB is working correctly:
 
 ```bash
 # Connect to MongoDB shell
 docker exec -it deltastream-mongodb mongosh deltastream
+```
 
-# Inside Mongo shell:
+**Inside the Mongo shell, run these commands:**
+```bash
 test> db.test.insertOne({message: "Hello DeltaStream"})
 { acknowledged: true, insertedId: ObjectId('...') }
 
@@ -1234,13 +1331,21 @@ test> db.test.find()
 test> exit
 ```
 
+**What's happening:**
+- `mongosh deltastream`: Connect to the `deltastream` database
+- `insertOne()`: Create a document (like a row in SQL)
+- `find()`: Query all documents in the collection
+
+**Verify:** You should see the inserted document returned. If so, MongoDB is working!
+
 ---
 
-### 1.9 Development Tools: Makefile
+#### Step 1.10: Create Development Shortcuts with Makefile
 
-Create `Makefile` for common commands:
+**Action:** Create a `Makefile` to simplify common development commands:
 
-```makefile
+```bash
+cat <<'EOF' > Makefile
 .PHONY: help build up down logs test clean
 
 help:
@@ -1274,15 +1379,24 @@ test:
 clean:
 	docker-compose down -v
 	docker system prune -f
+EOF
 ```
 
-**Usage:**
+**Non-trivial concept - Makefile syntax:**
+- `.PHONY`: Declares targets that don't create files (e.g., `build` is a command, not a file)
+- `@echo`: `@` suppresses echoing the command itself (cleaner output)
+- Tabs matter! Each command line MUST start with a tab (not spaces)
 
+**Usage examples:**
 ```bash
-make up     # Start services
-make logs   # Watch logs
-make down   # Stop services
+make help   # Show available commands
+make up     # Start all services
+make logs   # Watch logs in real-time
+make down   # Stop all services
+make clean  # Full cleanup (removes volumes too)
 ```
+
+**Verify:** Run `make help` and you should see the command list.
 
 ---
 
