@@ -6,10 +6,11 @@ const isGitHubPages = window.location.hostname.includes('github.io');
 const repoName = 'DeltaStream-OptionAnalysis2'; // Change to your repo name
 
 // Determine base path
-// Since index.html is now IN the docs folder, we use current directory
+// For GitHub Pages: docs/ folder is served as site root, so files are at /${repoName}/
+// For local: we're in docs/ folder, so use current directory
 const DOCS_BASE = isGitHubPages
-    ? `/${repoName}/docs`  // GitHub Pages: /repo-name/docs
-    : '.';                  // Local: current directory (we're already in docs/)
+    ? `/${repoName}`  // GitHub Pages: /repo-name (docs/ is the root)
+    : '.';             // Local: current directory
 
 console.log('Documentation base path:', DOCS_BASE);
 console.log('Is GitHub Pages:', isGitHubPages);
