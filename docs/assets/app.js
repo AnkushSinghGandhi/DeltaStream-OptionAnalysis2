@@ -117,7 +117,7 @@ function createNavItem(item, level = 0) {
     link.textContent = item.title;
     link.onclick = (e) => {
         e.preventDefault();
-        loadDoc(item.path);
+        loadDoc(item.path, e);
     };
 
     itemDiv.appendChild(link);
@@ -136,7 +136,7 @@ function createNavItem(item, level = 0) {
 }
 
 // Load Document
-async function loadDoc(path) {
+async function loadDoc(path, event = null) {
     try {
         const response = await fetch(`${DOCS_BASE}/${path}`);
         if (!response.ok) throw new Error('Document not found');
@@ -149,7 +149,18 @@ async function loadDoc(path) {
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.remove('active');
         });
-        event.target.classList.add('active');
+
+        // Only update active class if called from click event
+        if (event && event.target) {
+            event.target.classList.add('active');
+        } else {
+            // Find and activate the nav item matching the current path
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.onclick && item.onclick.toString().includes(path)) {
+                    item.classList.add('active');
+                }
+            });
+        }
 
         // Scroll to top
         window.scrollTo(0, 0);
@@ -253,7 +264,7 @@ function fixRelativeLinks(currentPath) {
             link.onclick = (e) => {
                 e.preventDefault();
                 const fullPath = href.startsWith('/') ? href.slice(1) : `${basePath}/${href}`;
-                loadDoc(fullPath);
+                loadDoc(fullPath, e);
             };
         }
     });
